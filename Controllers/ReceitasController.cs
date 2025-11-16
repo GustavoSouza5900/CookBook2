@@ -86,7 +86,7 @@ namespace CookBook.Controllers
                     Titulo = viewModel.Titulo,
                     TempoPreparoMinutos = viewModel.TempoPreparoMinutos,
                     Instrucoes = viewModel.Instrucoes,
-                    UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                    UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!
                 };
 
                 if (viewModel.ImagemArquivo != null)
@@ -289,6 +289,7 @@ namespace CookBook.Controllers
         }
 
         // GET: Receitas/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -304,21 +305,49 @@ namespace CookBook.Controllers
                 return NotFound();
             }
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (receita.UserId != userId)
+            {
+                return Forbid(); 
+            }
+
             return View(receita);
         }
 
         // POST: Receitas/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var receita = await _context.Receita.FindAsync(id);
-            if (receita != null)
+            if (receita == null)
             {
-                _context.Receita.Remove(receita);
+                return NotFound();
             }
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (receita.UserId != userId)
+            {
+                return Forbid(); 
+            }
+
+            if (!string.IsNullOrEmpty(receita.ImagemUrl))
+            {
+                // Constrói o caminho completo para o arquivo no servidor
+                string caminhoCompleto = Path.Combine(_hostEnvironment.WebRootPath, 
+                                                    receita.ImagemUrl.TrimStart('/'));
+
+                // Verifica se o arquivo existe e o apaga
+                if (System.IO.File.Exists(caminhoCompleto))
+                {
+                    System.IO.File.Delete(caminhoCompleto);
+                }
+            }
+
+            _context.Receita.Remove(receita);
             await _context.SaveChangesAsync();
+            
             return RedirectToAction(nameof(Index));
         }
 
