@@ -1,4 +1,4 @@
-@model CookBook.Models.Receita
+@model CookBook.ViewModels.ReceitaEditViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
@@ -29,14 +29,30 @@
                 <span asp-validation-for="Instrucoes" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="ImagemUrl" class="control-label"></label>
-                <input asp-for="ImagemUrl" class="form-control" />
-                <span asp-validation-for="ImagemUrl" class="text-danger"></span>
+                @if (!string.IsNullOrEmpty(Model.ImagemUrlExistente))
+                {
+                    <label class="control-label">Imagem Atual:</label><br />
+                    <img src="@Model.ImagemUrlExistente" style="max-width: 200px; height: auto;" class="mb-2" />
+                }
+
+                <label asp-for="NovaImagemArquivo" class="control-label">Nova Imagem de Capa</label>
+                <input asp-for="NovaImagemArquivo" type="file" class="form-control" />
             </div>
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId"></select>
-                <span asp-validation-for="UserId" class="text-danger"></span>
+            <div class="form-group mt-3">
+                <label class="control-label">Ingredientes Necessários</label>
+                <div class="border p-3" style="max-height: 200px; overflow-y: auto;">
+                    @foreach (var item in Model.IngredientesDisponiveis)
+                    {
+                        <div class="form-check">
+                            @* O helper 'Html.CheckBox' é mais fácil de usar aqui para verificar o 'Selected' *@
+                            <input class="form-check-input" type="checkbox" name="IngredientesSelecionadosIds" value="@item.Value" 
+                                @(item.Selected ? "checked" : "") id="ingrediente_@item.Value">
+                            <label class="form-check-label" for="ingrediente_@item.Value">
+                                @item.Text
+                            </label>
+                        </div>
+                    }
+                </div>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

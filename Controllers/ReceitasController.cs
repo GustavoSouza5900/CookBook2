@@ -136,6 +136,7 @@ namespace CookBook.Controllers
         }
 
         // GET: Receitas/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -143,13 +144,47 @@ namespace CookBook.Controllers
                 return NotFound();
             }
 
-            var receita = await _context.Receita.FindAsync(id);
+            var receita = await _context.Receita
+                .Include(r => r.ReceitaIngredientes) // Traz a tabela de junção
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (receita == null)
             {
                 return NotFound();
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", receita.UserId);
-            return View(receita);
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (receita.UserId != userId)
+            {
+                return Forbid(); // Ou RedirectToAction("Details", new { id = receita.Id })
+            }
+
+            var todosIngredientes = _context.Ingrediente.ToList();
+
+            var viewModel = new ReceitaEditViewModel
+            {
+                Id = receita.Id,
+                Titulo = receita.Titulo,
+                TempoPreparoMinutos = receita.TempoPreparoMinutos,
+                Instrucoes = receita.Instrucoes,
+                ImagemUrlExistente = receita.ImagemUrl,
+                
+                // IDs dos ingredientes atualmente na receita
+                IngredientesSelecionadosIds = receita.ReceitaIngredientes!
+                    .Select(ri => ri.IngredienteId).ToList(),
+
+                // Lista de opções disponíveis (marcando as que já estão selecionadas)
+                IngredientesDisponiveis = todosIngredientes.Select(i => new SelectListItem
+                {
+                    Value = i.Id.ToString(),
+                    Text = i.Nome,
+                    // Marca o checkbox se o ID estiver na lista de selecionados
+                    Selected = receita.ReceitaIngredientes!
+                        .Any(ri => ri.IngredienteId == i.Id) 
+                }).ToList()
+            };
+
+            return View(viewModel);
         }
 
         // POST: Receitas/Edit/5
@@ -157,23 +192,85 @@ namespace CookBook.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Titulo,TempoPreparoMinutos,Instrucoes,ImagemUrl,UserId")] Receita receita)
+        public async Task<IActionResult> Edit(int id, ReceitaEditViewModel viewModel)
         {
-            if (id != receita.Id)
+            if (id != viewModel.Id)
             {
                 return NotFound();
             }
 
+            ModelState.Remove("UserId");
+            ModelState.Remove("User");
+
             if (ModelState.IsValid)
             {
+                var receitaDB = await _context.Receita
+                    .Include(r => r.ReceitaIngredientes)
+                    .FirstOrDefaultAsync(r => r.Id == viewModel.Id);
+
+                if (receitaDB == null)
+                {
+                    return NotFound();
+                }
+
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (receitaDB.UserId != userId)
+                {
+                    return Forbid();
+                } 
+
+                if (viewModel.NovaImagemArquivo != null)
+                {
+                    if (!string.IsNullOrEmpty(receitaDB.ImagemUrl))
+                    {
+                        string oldPath = Path.Combine(_hostEnvironment.WebRootPath,
+                                                        receitaDB.ImagemUrl.TrimStart('/'));
+                        if (System.IO.File.Exists(oldPath))
+                        {
+                            System.IO.File.Delete(oldPath);
+                        }
+                    }
+
+                    string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "images", "receitas");
+                    Directory.CreateDirectory(uploadsFolder);
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(viewModel.NovaImagemArquivo.FileName);
+                    string filePath = Path.Combine(uploadsFolder, fileName);
+                    
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await viewModel.NovaImagemArquivo.CopyToAsync(fileStream);
+                    }
+                    receitaDB.ImagemUrl = "/images/receitas/" + fileName;
+                }
+
+                receitaDB.Titulo = viewModel.Titulo;
+                receitaDB.TempoPreparoMinutos = viewModel.TempoPreparoMinutos;
+                receitaDB.Instrucoes = viewModel.Instrucoes;
+
+                _context.ReceitaIngrediente.RemoveRange(receitaDB.ReceitaIngredientes!);
+
+                if (viewModel.IngredientesSelecionadosIds != null)
+                {
+                    foreach (var ingredienteId in viewModel.IngredientesSelecionadosIds)
+                    {
+                        var receitaIngrediente = new ReceitaIngrediente
+                        {
+                            ReceitaId = receitaDB.Id,
+                            IngredienteId = ingredienteId,
+                            Quantidade = "" // Manter vazio por enquanto
+                        };
+                        _context.ReceitaIngrediente.Add(receitaIngrediente);
+                    }
+                }
+
+
                 try
                 {
-                    _context.Update(receita);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ReceitaExists(receita.Id))
+                    if (!ReceitaExists(viewModel.Id))
                     {
                         return NotFound();
                     }
@@ -184,8 +281,11 @@ namespace CookBook.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", receita.UserId);
-            return View(receita);
+            viewModel.IngredientesDisponiveis = _context.Ingrediente
+                .Select(i => new SelectListItem { Value = i.Id.ToString(), Text = i.Nome })
+                .ToList();
+            
+            return View(viewModel);
         }
 
         // GET: Receitas/Delete/5
