@@ -1,7 +1,7 @@
-@model CookBook.Models.Receita
+@model CookBook.ViewModels.ReceitaCreateViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Criar Receita";
 }
 
 <h1>Create</h1>
@@ -27,14 +27,24 @@
                 <input asp-for="Instrucoes" class="form-control" />
                 <span asp-validation-for="Instrucoes" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ImagemUrl" class="control-label"></label>
-                <input asp-for="ImagemUrl" class="form-control" />
-                <span asp-validation-for="ImagemUrl" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label" style="display: none;"></label>
-                <select asp-for="UserId" class ="form-control" asp-items="ViewBag.UserId" style="display: none;"></select>
+            <div class="form-group mt-3">
+                <label class="control-label">Ingredientes Necessários</label>
+                <div class="border p-3" style="max-height: 200px; overflow-y: auto;">
+                    @foreach (var item in Model.IngredientesDisponiveis)
+                    {
+                        <div class="form-check">
+                            @* O 'name="IngredientesSelecionadosIds"' é crucial! 
+                                O MVC automaticamente mapeia todos os valores selecionados 
+                                para a lista IngredientesSelecionadosIds no ViewModel.
+                            *@
+                            <input class="form-check-input" type="checkbox" name="IngredientesSelecionadosIds" value="@item.Value" id="ingrediente_@item.Value">
+                            <label class="form-check-label" for="ingrediente_@item.Value">
+                                @item.Text
+                            </label>
+                        </div>
+                    }
+                </div>
+                <span asp-validation-for="IngredientesSelecionadosIds" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="ImagemArquivo" class="control-label"></label>
@@ -52,3 +62,6 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

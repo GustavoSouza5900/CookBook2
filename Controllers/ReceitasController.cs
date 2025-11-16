@@ -5,6 +5,7 @@ using CookBook.Data;
 using CookBook.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using CookBook.ViewModels;
 
 
 
@@ -52,8 +53,18 @@ namespace CookBook.Controllers
         // GET: Receitas/Create
         public IActionResult Create()
         {
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
-            return View();
+            var ingredientes = _context.Ingrediente.ToList();
+            var viewModel = new ReceitaCreateViewModel
+            {
+                IngredientesDisponiveis = ingredientes.Select(i => new SelectListItem
+                {
+                    Value = i.Id.ToString(), // O ID do ingrediente
+                    Text = i.Nome,           // O nome exibido na lista
+                    Selected = false         // Nenhum selecionado por padrão
+                }).ToList()
+            };
+            // ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+            return View(viewModel);
         }
 
         // POST: Receitas/Create
@@ -61,7 +72,7 @@ namespace CookBook.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Titulo,TempoPreparoMinutos,Instrucoes,ImagemArquivo")] Receita receita)
+        public async Task<IActionResult> Create(ReceitaCreateViewModel viewModel)
         {
             ModelState.Remove("UserId");
             ModelState.Remove("User");
@@ -70,20 +81,25 @@ namespace CookBook.Controllers
             
             if(ModelState.IsValid)
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                receita.UserId = userId;
+                var receita = new Receita
+                {
+                    Titulo = viewModel.Titulo,
+                    TempoPreparoMinutos = viewModel.TempoPreparoMinutos,
+                    Instrucoes = viewModel.Instrucoes,
+                    UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                };
 
-                if (receita.ImagemArquivo != null)
+                if (viewModel.ImagemArquivo != null)
                 {
                     string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "images", "receitas");
                     Directory.CreateDirectory(uploadsFolder);
 
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(receita.ImagemArquivo.FileName);
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(viewModel.ImagemArquivo.FileName);
                     string filePath = Path.Combine(uploadsFolder, fileName);
 
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
-                        await receita.ImagemArquivo.CopyToAsync(fileStream);
+                        await viewModel.ImagemArquivo.CopyToAsync(fileStream);
                     }
                     
                     receita.ImagemUrl = "/images/receitas/" + fileName;
@@ -91,11 +107,32 @@ namespace CookBook.Controllers
 
                 _context.Add(receita);
                 await _context.SaveChangesAsync();
+
+                if (viewModel.IngredientesSelecionadosIds != null)
+                {
+                    foreach (var IngredienteId in viewModel.IngredientesSelecionadosIds)
+                    {
+                        var receitaIngrediente = new ReceitaIngrediente
+                        {
+                            ReceitaId = receita.Id,
+                            IngredienteId = IngredienteId,
+                            Quantidade = ""
+                        };
+
+                        _context.Add(receitaIngrediente);
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+
                 return RedirectToAction(nameof(Index));
-                
             }
-            
-            return View(receita);
+
+            viewModel.IngredientesDisponiveis = _context.Ingrediente
+                .Select(i => new SelectListItem { Value = i.Id.ToString(), Text = i.Nome })
+                .ToList();
+                
+            return View(viewModel);
         }
 
         // GET: Receitas/Edit/5

@@ -38,5 +38,15 @@ public class ApplicationDbContext : IdentityDbContext
             .WithMany()
             .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Restrict); 
+
+        builder.Entity<Ingrediente>().HasData(
+                new Ingrediente { Id = 1, Nome = "Arroz" },
+                new Ingrediente { Id = 2, Nome = "Feijão" },
+                new Ingrediente { Id = 3, Nome = "Frango" },
+                new Ingrediente { Id = 4, Nome = "Carne Moída" },
+                new Ingrediente { Id = 5, Nome = "Cebola" },
+                new Ingrediente { Id = 6, Nome = "Alho" },
+                new Ingrediente { Id = 7, Nome = "Azeite de Oliva" }
+            );
     }
 }
