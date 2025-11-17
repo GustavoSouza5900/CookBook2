@@ -40,19 +40,35 @@
             </div>
             <div class="form-group mt-3">
                 <label class="control-label">Ingredientes Necessários</label>
-                <div class="border p-3" style="max-height: 200px; overflow-y: auto;">
-                    @foreach (var item in Model.IngredientesDisponiveis)
-                    {
-                        <div class="form-check">
-                            @* O helper 'Html.CheckBox' é mais fácil de usar aqui para verificar o 'Selected' *@
-                            <input class="form-check-input" type="checkbox" name="IngredientesSelecionadosIds" value="@item.Value" 
-                                @(item.Selected ? "checked" : "") id="ingrediente_@item.Value">
-                            <label class="form-check-label" for="ingrediente_@item.Value">
-                                @item.Text
-                            </label>
-                        </div>
-                    }
-                </div>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">Sel.</th>
+                            <th>Ingrediente</th>
+                            <th>Quantidade (Ex: 2 colheres de sopa)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Ingredientes.Count; i++)
+                        {
+                            var ingrediente = Model.Ingredientes[i];
+                            <tr>
+                                <td>
+                                    <input type="hidden" asp-for="@Model.Ingredientes[i].IngredienteId" />
+                                    <input type="hidden" asp-for="@Model.Ingredientes[i].NomeIngrediente" />
+                                    
+                                    <input type="checkbox" asp-for="@Model.Ingredientes[i].Selecionado" /> 
+                                </td>
+                                <td>
+                                    @ingrediente.NomeIngrediente
+                                </td>
+                                <td>
+                                    <input asp-for="@Model.Ingredientes[i].Quantidade" class="form-control form-control-sm" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
