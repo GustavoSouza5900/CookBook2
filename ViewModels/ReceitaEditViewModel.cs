@@ -13,7 +13,7 @@ namespace CookBook.ViewModels
         public string? ImagemUrlExistente { get; set; } // URL da imagem atual (para exibição na View)
         public IFormFile? NovaImagemArquivo { get; set; } // Novo arquivo enviado pelo usuário
 
-        public List<int> IngredientesSelecionadosIds { get; set; } = new List<int>();
+        public List<ReceitaIngredienteInputModel> Ingredientes { get; set; } = new List<ReceitaIngredienteInputModel>();
         public List<SelectListItem> IngredientesDisponiveis { get; set; } = new List<SelectListItem>();
     }
 }

@@ -196,7 +196,8 @@ namespace CookBook.Controllers
             }
 
             var receita = await _context.Receita
-                .Include(r => r.ReceitaIngredientes) // Traz a tabela de junção
+                .Include(r => r.ReceitaIngredientes)!
+                    .ThenInclude(ri => ri.Ingrediente) // Traz a tabela de junção
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (receita == null)
@@ -207,10 +208,11 @@ namespace CookBook.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (receita.UserId != userId)
             {
-                return Forbid(); // Ou RedirectToAction("Details", new { id = receita.Id })
+                return Forbid(); 
             }
 
             var todosIngredientes = _context.Ingrediente.ToList();
+            var ingredientesReceita = receita.ReceitaIngredientes!.ToDictionary(ri => ri.IngredienteId);
 
             var viewModel = new ReceitaEditViewModel
             {
@@ -220,18 +222,17 @@ namespace CookBook.Controllers
                 Instrucoes = receita.Instrucoes,
                 ImagemUrlExistente = receita.ImagemUrl,
                 
-                // IDs dos ingredientes atualmente na receita
-                IngredientesSelecionadosIds = receita.ReceitaIngredientes!
-                    .Select(ri => ri.IngredienteId).ToList(),
-
-                // Lista de opções disponíveis (marcando as que já estão selecionadas)
-                IngredientesDisponiveis = todosIngredientes.Select(i => new SelectListItem
+                Ingredientes = todosIngredientes.Select(i =>
                 {
-                    Value = i.Id.ToString(),
-                    Text = i.Nome,
-                    // Marca o checkbox se o ID estiver na lista de selecionados
-                    Selected = receita.ReceitaIngredientes!
-                        .Any(ri => ri.IngredienteId == i.Id) 
+                    var riExsitente = ingredientesReceita.GetValueOrDefault(i.Id);
+
+                    return new ReceitaIngredienteInputModel
+                    {
+                        IngredienteId = i.Id,
+                        NomeIngrediente = i.Nome,
+                        Selecionado = riExsitente != null,
+                        Quantidade = riExsitente?.Quantidade ?? string.Empty
+                    };
                 }).ToList()
             };
 
@@ -239,8 +240,6 @@ namespace CookBook.Controllers
         }
 
         // POST: Receitas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ReceitaEditViewModel viewModel)
@@ -300,20 +299,24 @@ namespace CookBook.Controllers
 
                 _context.ReceitaIngrediente.RemoveRange(receitaDB.ReceitaIngredientes!);
 
-                if (viewModel.IngredientesSelecionadosIds != null)
+                var ingredientesSalvar = viewModel.Ingredientes
+                    .Where(i => i.Selecionado)
+                    .ToList();
+                
+                if (ingredientesSalvar.Any())
                 {
-                    foreach (var ingredienteId in viewModel.IngredientesSelecionadosIds)
+                    foreach (var input in ingredientesSalvar)
                     {
                         var receitaIngrediente = new ReceitaIngrediente
                         {
                             ReceitaId = receitaDB.Id,
-                            IngredienteId = ingredienteId,
-                            Quantidade = "" // Manter vazio por enquanto
+                            IngredienteId = input.IngredienteId,
+                            Quantidade = input.Quantidade ?? string.Empty
                         };
+
                         _context.ReceitaIngrediente.Add(receitaIngrediente);
                     }
                 }
-
 
                 try
                 {
