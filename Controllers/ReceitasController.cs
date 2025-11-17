@@ -8,7 +8,6 @@ using System.Security.Claims;
 using CookBook.ViewModels;
 
 
-
 namespace CookBook.Controllers
 {
     [Authorize]
@@ -32,6 +31,7 @@ namespace CookBook.Controllers
         }
 
         // GET: Receitas/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -40,30 +40,69 @@ namespace CookBook.Controllers
             }
 
             var receita = await _context.Receita
-                .Include(r => r.User)
+                .Include(r => r.User) // Criador da Receita
+                .Include(r => r.ReceitaIngredientes!) // Relação N:N
+                    .ThenInclude(ri => ri.Ingrediente)
+                .Include(r => r.Comentarios!) // Os comentários da receita
+                    .ThenInclude(c => c.User) // O autor de cada comentário
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (receita == null)
             {
                 return NotFound();
             }
 
-            return View(receita);
+            var viewModel = new ReceitaDetailsViewModel
+            {
+                Receita = receita,
+                ReceitaId = receita.Id
+            };
+
+            return View(viewModel);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> AdicionarComentario(ReceitaDetailsViewModel viewModel)
+        {
+            if (string.IsNullOrWhiteSpace(viewModel.NovoComentarioTexto))
+            {
+                // Redireciona de volta para Details se o texto estiver vazio
+                return RedirectToAction(nameof(Details), new { id = viewModel.ReceitaId });
+            }
+
+            var comentario = new Comentario
+            {
+                Conteudo = viewModel.NovoComentarioTexto,
+                ReceitaId = viewModel.ReceitaId,
+                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!, // ID do usuário logado
+                DataCriacao = DateTime.Now
+            };
+
+            _context.Comentario.Add(comentario);
+            await _context.SaveChangesAsync();
+
+            // Redireciona para a mesma página de detalhes (Details)
+            return RedirectToAction(nameof(Details), new { id = viewModel.ReceitaId });
         }
 
         // GET: Receitas/Create
         public IActionResult Create()
         {
-            var ingredientes = _context.Ingrediente.ToList();
+            var todosIngredientes = _context.Ingrediente.ToList();
             var viewModel = new ReceitaCreateViewModel
             {
-                IngredientesDisponiveis = ingredientes.Select(i => new SelectListItem
+                Ingredientes = todosIngredientes.Select(i => new ReceitaIngredienteInputModel
                 {
-                    Value = i.Id.ToString(), // O ID do ingrediente
-                    Text = i.Nome,           // O nome exibido na lista
-                    Selected = false         // Nenhum selecionado por padrão
+                    IngredienteId = i.Id,
+                    NomeIngrediente = i.Nome,
+                    Selecionado = false,
+                    Quantidade = ""
                 }).ToList()
             };
-            // ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+            
             return View(viewModel);
         }
 
@@ -108,18 +147,22 @@ namespace CookBook.Controllers
                 _context.Add(receita);
                 await _context.SaveChangesAsync();
 
-                if (viewModel.IngredientesSelecionadosIds != null)
+                var ingredientesSalvar = viewModel.Ingredientes
+                    .Where(i => i.Selecionado)
+                    .ToList();
+                
+                if (ingredientesSalvar.Any())
                 {
-                    foreach (var IngredienteId in viewModel.IngredientesSelecionadosIds)
+                    foreach (var input in ingredientesSalvar)
                     {
                         var receitaIngrediente = new ReceitaIngrediente
                         {
                             ReceitaId = receita.Id,
-                            IngredienteId = IngredienteId,
-                            Quantidade = ""
+                            IngredienteId = input.IngredienteId,
+                            Quantidade = input.Quantidade ?? string.Empty,
                         };
 
-                        _context.Add(receitaIngrediente);
+                        _context.ReceitaIngrediente.Add(receitaIngrediente);
                     }
 
                     await _context.SaveChangesAsync();
@@ -128,9 +171,17 @@ namespace CookBook.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            viewModel.IngredientesDisponiveis = _context.Ingrediente
-                .Select(i => new SelectListItem { Value = i.Id.ToString(), Text = i.Nome })
-                .ToList();
+            if (viewModel.Ingredientes == null || !viewModel.Ingredientes.Any())
+            {
+                var todosIngredientes = _context.Ingrediente.ToList();
+                viewModel.Ingredientes = todosIngredientes.Select(i => new ReceitaIngredienteInputModel
+                {
+                    IngredienteId = i.Id,
+                    NomeIngrediente = i.Nome,
+                    Selecionado = false,
+                    Quantidade = ""
+                }).ToList();
+            }
                 
             return View(viewModel);
         }

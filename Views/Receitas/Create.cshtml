@@ -29,22 +29,37 @@
             </div>
             <div class="form-group mt-3">
                 <label class="control-label">Ingredientes Necessários</label>
-                <div class="border p-3" style="max-height: 200px; overflow-y: auto;">
-                    @foreach (var item in Model.IngredientesDisponiveis)
-                    {
-                        <div class="form-check">
-                            @* O 'name="IngredientesSelecionadosIds"' é crucial! 
-                                O MVC automaticamente mapeia todos os valores selecionados 
-                                para a lista IngredientesSelecionadosIds no ViewModel.
-                            *@
-                            <input class="form-check-input" type="checkbox" name="IngredientesSelecionadosIds" value="@item.Value" id="ingrediente_@item.Value">
-                            <label class="form-check-label" for="ingrediente_@item.Value">
-                                @item.Text
-                            </label>
-                        </div>
-                    }
-                </div>
-                <span asp-validation-for="IngredientesSelecionadosIds" class="text-danger"></span>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">Sel.</th>
+                            <th>Ingrediente</th>
+                            <th>Quantidade (Ex: 2 colheres de sopa)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @* É NECESSÁRIO USAR O LOOP 'for' para mapeamento correto da lista *@
+                        @for (int i = 0; i < Model.Ingredientes.Count; i++)
+                        {
+                            var ingrediente = Model.Ingredientes[i];
+                            <tr>
+                                <td>
+                                    <input type="hidden" asp-for="@Model.Ingredientes[i].IngredienteId" />
+                                    <input type="hidden" asp-for="@Model.Ingredientes[i].NomeIngrediente" />
+                                    
+                                    <input type="checkbox" asp-for="@Model.Ingredientes[i].Selecionado" />
+                                </td>
+                                <td>
+                                    @ingrediente.NomeIngrediente
+                                </td>
+                                <td>
+                                    @* O campo de quantidade só é enviado se o checkbox for marcado *@
+                                    <input asp-for="@Model.Ingredientes[i].Quantidade" class="form-control form-control-sm" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
             <div class="form-group">
                 <label asp-for="ImagemArquivo" class="control-label"></label>

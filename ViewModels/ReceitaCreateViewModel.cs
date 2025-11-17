@@ -14,8 +14,16 @@ namespace CookBook.ViewModels
 
         public IFormFile? ImagemArquivo { get; set; }
 
-        public List<int> IngredientesSelecionadosIds { get; set; } = new List<int>();
+        public List<ReceitaIngredienteInputModel> Ingredientes { get; set; } = new List<ReceitaIngredienteInputModel>();
 
         public List<SelectListItem> IngredientesDisponiveis { get; set; } = new List<SelectListItem>();
+    }
+
+    public class ReceitaIngredienteInputModel
+    {
+        public int IngredienteId { get; set; }
+        public string? Quantidade { get; set; }
+        public bool Selecionado { get; set; }  
+        public string? NomeIngrediente { get; set; } 
     }
 }

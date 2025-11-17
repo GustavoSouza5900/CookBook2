@@ -1,48 +1,90 @@
-@model CookBook.Models.Receita
+@model CookBook.ViewModels.ReceitaDetailsViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model.Receita.Titulo;
 }
 
-<h1>Details</h1>
+<h1>@Model.Receita.Titulo</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <img src="@Model.Receita.ImagemUrl" alt="Imagem da Receita" class="img-fluid rounded" />
+        <p class="mt-2">**Tempo de Preparo:** @Model.Receita.TempoPreparoMinutos minutos</p>
+        <p>**Criador:** @Model.Receita.User?.UserName</p>
+
+        <h3>Ingredientes</h3>
+        <ul>
+            @foreach (var ri in Model.Receita.ReceitaIngredientes!)
+            {
+                <li>**@ri.Quantidade** de @ri.Ingrediente.Nome</li>
+            }
+        </ul>
+    </div>
+    
+    <div class="col-md-6">
+        <h3>Instruções</h3>
+        <p>@Model.Receita.Instrucoes</p>
+    </div>
+</div>
+
+<hr />
+
+<section class="mt-4">
+    <h3>Comentários (@Model.Receita.Comentarios!.Count)</h3>
+
+    @if (User.Identity!.IsAuthenticated)
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>Adicionar um Comentário:</h5>
+                <form asp-action="AdicionarComentario" method="post">
+                    <input type="hidden" asp-for="ReceitaId" /> 
+                    
+                    <div class="form-group">
+                        <textarea asp-for="NovoComentarioTexto" class="form-control" rows="3" placeholder="Escreva seu comentário aqui..."></textarea>
+                        <span asp-validation-for="NovoComentarioTexto" class="text-danger"></span>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success mt-2">Enviar Comentário</button>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <a asp-controller="Account" asp-action="Login">Faça login</a> para deixar um comentário.
+        </div>
+    }
+
+    <div class="comentarios-lista mt-4">
+        @if (Model.Receita.Comentarios.Any())
+        {
+            @foreach (var comentario in Model.Receita.Comentarios.OrderByDescending(c => c.DataCriacao))
+            {
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p class="card-text">@comentario.Conteudo</p>
+                        <footer class="blockquote-footer">
+                            Postado por: <strong>@comentario.User!.UserName</strong> em @comentario.DataCriacao.ToString("dd/MM/yyyy HH:mm")
+                        </footer>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p>Nenhum comentário ainda. Seja o primeiro!</p>
+        }
+    </div>
+</section>
 
 <div>
-    <h4>Receita</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Titulo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Titulo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TempoPreparoMinutos)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TempoPreparoMinutos)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Instrucoes)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Instrucoes)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImagemUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImagemUrl)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Id)
-        </dd>
-    </dl>
+    <a asp-action="Edit" asp-route-id="@Model.Receita.Id">Editar</a> |
+    <a asp-action="Index">Voltar para a Lista</a>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
