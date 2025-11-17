@@ -91,24 +91,12 @@ namespace CookBook.Controllers
         // GET: Receitas/Create
         public IActionResult Create()
         {
-            var todosIngredientes = _context.Ingrediente.ToList();
-            var viewModel = new ReceitaCreateViewModel
-            {
-                Ingredientes = todosIngredientes.Select(i => new ReceitaIngredienteInputModel
-                {
-                    IngredienteId = i.Id,
-                    NomeIngrediente = i.Nome,
-                    Selecionado = false,
-                    Quantidade = ""
-                }).ToList()
-            };
+            ViewBag.IngredientesDisponiveis = _context.Ingrediente.ToList();
             
-            return View(viewModel);
+            return View(new ReceitaCreateViewModel());
         }
 
         // POST: Receitas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ReceitaCreateViewModel viewModel)
@@ -146,44 +134,63 @@ namespace CookBook.Controllers
 
                 _context.Add(receita);
                 await _context.SaveChangesAsync();
-
-                var ingredientesSalvar = viewModel.Ingredientes
-                    .Where(i => i.Selecionado)
-                    .ToList();
                 
-                if (ingredientesSalvar.Any())
+                if (!string.IsNullOrEmpty(viewModel.IngredientesInputData))
                 {
-                    foreach (var input in ingredientesSalvar)
+                    var inputIngredientes = viewModel.IngredientesInputData.Split(";", StringSplitOptions.RemoveEmptyEntries);
+
+                    var ingredientesExistentes = await _context.Ingrediente.ToListAsync();
+                    var ingredientesMap = ingredientesExistentes.ToDictionary(i => i.Nome.ToLower());
+
+                    foreach (var input in inputIngredientes)
                     {
-                        var receitaIngrediente = new ReceitaIngrediente
+                        var partes = input.Split("|", 2);
+                        if (partes.Length != 2)
                         {
-                            ReceitaId = receita.Id,
-                            IngredienteId = input.IngredienteId,
-                            Quantidade = input.Quantidade ?? string.Empty,
-                        };
+                            continue;
+                        }
 
-                        _context.ReceitaIngrediente.Add(receitaIngrediente);
+                        var nome = partes[0].Trim();
+                        var quantidade = partes[1].Trim();
+                        var nomeNormalizado = nome.ToLower();
+
+                        Ingrediente? ingrediente = null;
+
+                        if (ingredientesMap.ContainsKey(nomeNormalizado))
+                        {
+                            ingrediente = ingredientesMap[nomeNormalizado];
+                        } else
+                        {
+                            //Ingrediente não existe no banco
+                            ingrediente = new Ingrediente()
+                            {
+                                Nome = nome,
+                            };
+
+                            _context.Ingrediente.Add(ingrediente);
+                            await _context.SaveChangesAsync(); //necessario para obter Id
+
+                            ingredientesMap.Add(nomeNormalizado, ingrediente); //adiciona no map
+                        }
+                        
+                        if (ingrediente != null)
+                        {
+                            var receitaIngrediente = new ReceitaIngrediente()
+                            {
+                                ReceitaId = receita.Id,
+                                IngredienteId = ingrediente.Id,
+                                Quantidade = quantidade
+                            };
+
+                            _context.ReceitaIngrediente.Add(receitaIngrediente);
+                        }
+
                     }
-
-                    await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync(); // salva os ReceitaIngredientes
                 }
-
-                return RedirectToAction(nameof(Index));
-            }
-
-            if (viewModel.Ingredientes == null || !viewModel.Ingredientes.Any())
-            {
-                var todosIngredientes = _context.Ingrediente.ToList();
-                viewModel.Ingredientes = todosIngredientes.Select(i => new ReceitaIngredienteInputModel
-                {
-                    IngredienteId = i.Id,
-                    NomeIngrediente = i.Nome,
-                    Selecionado = false,
-                    Quantidade = ""
-                }).ToList();
-            }
                 
-            return View(viewModel);
+            }  
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Receitas/Edit/5
