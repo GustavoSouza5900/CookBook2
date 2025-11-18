@@ -15,6 +15,7 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<Ingrediente> Ingrediente { get; set; }
     public DbSet<Comentario> Comentario { get; set; }
     public DbSet<ReceitaIngrediente> ReceitaIngrediente { get; set; }
+    public DbSet<ReceitaCurtida> ReceitaCurtida { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -60,5 +61,20 @@ public class ApplicationDbContext : IdentityDbContext
                 new Ingrediente { Id = 6, Nome = "Alho" },
                 new Ingrediente { Id = 7, Nome = "Azeite de Oliva" }
             );
+
+        builder.Entity<ReceitaCurtida>()
+            .HasKey(rc => new { rc.ReceitaId, rc.UserId });
+        
+        builder.Entity<ReceitaCurtida>()
+            .HasOne(rc => rc.Receita)
+            .WithMany(r => r.ReceitaCurtidas)
+            .HasForeignKey(rc => rc.ReceitaId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<ReceitaCurtida>()
+            .HasOne(rc => rc.User)
+            .WithMany() // User não precisa de uma coleção de Curtidas
+            .HasForeignKey(rc => rc.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

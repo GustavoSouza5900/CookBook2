@@ -28,6 +28,7 @@ namespace CookBook.Controllers
         {
             var receitasQuery = _context.Receita
                 .Include(r => r.User)
+                .Include(r => r.ReceitaCurtidas)
                 .AsQueryable();
             
             if (!string.IsNullOrEmpty(viewModel.SearchQuery))
@@ -66,6 +67,7 @@ namespace CookBook.Controllers
                     .ThenInclude(ri => ri.Ingrediente)
                 .Include(r => r.Comentarios!) // Os comentários da receita
                     .ThenInclude(c => c.User) // O autor de cada comentário
+                .Include(r => r.ReceitaCurtidas)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (receita == null)
@@ -73,13 +75,48 @@ namespace CookBook.Controllers
                 return NotFound();
             }
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var curtidas = receita.ReceitaCurtidas;
+            var isLiked = curtidas != null && curtidas.Any(rc => rc.UserId == userId);
+
             var viewModel = new ReceitaDetailsViewModel
             {
                 Receita = receita,
-                ReceitaId = receita.Id
+                ReceitaId = receita.Id,
+                TotalCurtidas = curtidas?.Count ?? 0,
+                IsLikedByCurrentUser = isLiked
             };
 
             return View(viewModel);
+        }
+
+        // POST: Receitas/ToggleLike/5
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> ToggleLike(int id)
+        {   
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var curtidaExistente = await _context.ReceitaCurtida
+                .FirstOrDefaultAsync(rc => rc.ReceitaId == id && rc.UserId == userId);
+
+            if (curtidaExistente != null)
+            {
+                _context.ReceitaCurtida.Remove(curtidaExistente);
+            } else
+            {
+                var novaCurtida = new ReceitaCurtida
+                {
+                    ReceitaId = id,
+                    UserId = userId!
+                };
+                _context.ReceitaCurtida.Add(novaCurtida);
+            }
+
+            await _context.SaveChangesAsync();
+
+            var novaContagem = await _context.ReceitaCurtida.CountAsync(rc => rc.ReceitaId == id);
+
+            return Json(new { success = true, likeCount = novaContagem, isLiked = (curtidaExistente == null) });
         }
 
 

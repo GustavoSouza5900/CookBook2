@@ -18,7 +18,7 @@ namespace CookBook.Models
         
         public string UserId { get; set; } = string.Empty;
 
-        [NotMapped] // Indica ao EF Core para ignorar este campo no banco
+        [NotMapped] 
         public IFormFile? ImagemArquivo { get; set; }
 
         public IdentityUser User { get; set; } = null!;
@@ -26,5 +26,13 @@ namespace CookBook.Models
         public ICollection<Comentario>? Comentarios { get; set; }
         
         public ICollection<ReceitaIngrediente>? ReceitaIngredientes { get; set; }
+        public DateTime DataCriacao { get; set; }
+
+        public ICollection<ReceitaCurtida>? ReceitaCurtidas { get; set; }
+        
+        public Receita() 
+        {
+            DataCriacao = DateTime.Now; // Define a data/hora atual por padrão
+        }
     }
 }

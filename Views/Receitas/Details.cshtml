@@ -1,4 +1,7 @@
+@using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 @model CookBook.ViewModels.ReceitaDetailsViewModel
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
 @{
     ViewData["Title"] = Model.Receita.Titulo;
@@ -12,6 +15,22 @@
         <img src="@Model.Receita.ImagemUrl" alt="Imagem da Receita" class="img-fluid rounded" />
         <p class="mt-2">**Tempo de Preparo:** @Model.Receita.TempoPreparoMinutos minutos</p>
         <p>**Criador:** @Model.Receita.User?.UserName</p>
+        <p class="mt-2"><small class="text-muted">Criado em: @Model.Receita.DataCriacao.ToString("dd/MM/yyyy")</small></p>
+
+        <div class="d-flex align-items-center mb-3">
+            @if (User.Identity!.IsAuthenticated)
+            {
+                <button id="likeButton" 
+                        data-receita-id="@Model.ReceitaId"
+                        class="btn @(Model.IsLikedByCurrentUser ? "btn-danger" : "btn-outline-danger") me-2"
+                        type="button">
+                    <i class="fas fa-heart"></i>
+                </button>
+            }
+            
+            <span id="likeCountDisplay" class="fs-5">@Model.TotalCurtidas</span>
+            <span class="ms-1 text-muted">Curtidas</span>
+        </div>
 
         <h3>Ingredientes</h3>
         <ul>
@@ -87,4 +106,41 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        document.getElementById('likeButton')?.addEventListener('click', async function() {
+            const button = this;
+            const receitaId = button.getAttribute('data-receita-id');
+            const url = `/Receitas/ToggleLike/${receitaId}`;
+            const likeCountDisplay = document.getElementById('likeCountDisplay');
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        // Inclui o token anti-forgery, se estiver configurado
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Atualiza o contador
+                    likeCountDisplay.textContent = data.likeCount;
+
+                    // Alterna o estilo do botão
+                    if (data.isLiked) {
+                        button.classList.remove('btn-outline-danger');
+                        button.classList.add('btn-danger');
+                    } else {
+                        button.classList.remove('btn-danger');
+                        button.classList.add('btn-outline-danger');
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao curtir/descurtir:', error);
+            }
+        });
+    </script>
 }
