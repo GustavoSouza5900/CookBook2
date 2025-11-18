@@ -24,10 +24,31 @@ namespace CookBook.Controllers
 
         // GET: Receitas
         [AllowAnonymous] // Permite acesso sem login, mesmo com o [Authorize] no topo da classe
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(ReceitaIndexViewModel viewModel)
         {
-            var applicationDbContext = _context.Receita.Include(r => r.User);
-            return View(await applicationDbContext.ToListAsync());
+            var receitasQuery = _context.Receita
+                .Include(r => r.User)
+                .AsQueryable();
+            
+            if (!string.IsNullOrEmpty(viewModel.SearchQuery))
+            {
+                var termo = viewModel.SearchQuery.Trim().ToLower();
+
+                if (viewModel.SearchType == "Nome")
+                {
+                    receitasQuery = receitasQuery.Where(r => r.Titulo.ToLower().Contains(termo));
+                } else if (viewModel.SearchType == "Ingredientes")
+                {
+                    receitasQuery = receitasQuery
+                        .Include(r => r.ReceitaIngredientes!)
+                        .ThenInclude(ri => ri.Ingrediente)
+                        .Where(r => r.ReceitaIngredientes!.Any(ri =>
+                            ri.Ingrediente.Nome.ToLower().Contains(termo)));
+                }
+            }
+            viewModel.Receitas = await receitasQuery.ToListAsync();
+
+            return View(viewModel);
         }
 
         // GET: Receitas/Details/5

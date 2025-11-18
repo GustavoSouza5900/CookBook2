@@ -1,59 +1,104 @@
-@model IEnumerable<CookBook.Models.Receita>
+@model CookBook.ViewModels.ReceitaIndexViewModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Receitas";
 }
 
-<h1>Index</h1>
+
+<h1>Receitas</h1>
+<hr />
+
+<form asp-controller="Receitas" asp-action="Index" method="get" class="mb-4">
+    <div class="input-group mb-3">
+        <input type="text" 
+               class="form-control" 
+               placeholder="Pesquisar por nome ou ingrediente..." 
+               name="searchQuery" 
+               value="@Model.SearchQuery" />
+        
+        <button class="btn btn-primary" type="submit">
+            <i class="fas fa-search"></i> Pesquisar
+        </button>
+    </div>
+
+    <div class="d-flex gap-4">
+        <div class="form-check">
+            <input class="form-check-input" 
+                   type="radio" 
+                   name="searchType" 
+                   id="radioNome" 
+                   value="Nome"
+                   checked="@(Model.SearchType == "Nome")">
+            <label class="form-check-label" for="radioNome">
+                Pesquisar por Nome
+            </label>
+        </div>
+        
+        <div class="form-check">
+            <input class="form-check-input" 
+                   type="radio" 
+                   name="searchType" 
+                   id="radioIngredientes" 
+                   value="Ingredientes"
+                   checked="@(Model.SearchType == "Ingredientes")">
+            <label class="form-check-label" for="radioIngredientes">
+                Pesquisar por Ingredientes
+            </label>
+        </div>
+    </div>
+</form>
+
+<hr />
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Nova Receita</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Titulo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TempoPreparoMinutos)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Instrucoes)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ImagemUrl)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Titulo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TempoPreparoMinutos)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Instrucoes)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ImagemUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+<hr />
+
+@* 1. LOOP DE RECEITAS (Card View) *@
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    @if (Model.Receitas.Any())
+    {
+        @foreach (var item in Model.Receitas)
+        {
+            <div class="col">
+                <a asp-action="Details" asp-route-id="@item.Id" class="card h-100 text-decoration-none text-dark shadow-sm">
+                    
+                    @* 1. Imagem da Receita *@
+                    <img src="@item.ImagemUrl" 
+                         class="card-img-top" 
+                         alt="Imagem da receita @item.Titulo"
+                         style="height: 200px; object-fit: cover;">
+                    
+                    <div class="card-body">
+                        @* 2. Nome da Receita (Título) *@
+                        <h5 class="card-title text-truncate">@item.Titulo</h5>
+                        
+                        @* 3. Informações Essenciais *@
+                        <p class="card-text mb-1">
+                            <small class="text-muted">Por: **@item.User.UserName**</small>
+                        </p>
+                        <p class="card-text mb-1">
+                            <small class="text-muted">Tempo: **@item.TempoPreparoMinutos** min.</small>
+                        </p>
+                        
+                        @* 4. Espaço para Futuras Funcionalidades *@
+                        <div class="mt-2">
+                             @* <small class="text-info">Data: @item.DataCriacao.ToString("dd/MM/yyyy")</small> | 
+                             <small class="text-danger"><i class="fas fa-heart"></i> @item.Curtidas</small> *@
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="alert alert-warning" role="alert">
+                Nenhuma receita encontrada. Tente outra pesquisa.
+            </div>
+        </div>
+    }
+</div>

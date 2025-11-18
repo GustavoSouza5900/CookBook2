@@ -433,3 +433,4 @@
 /home/gustavo/TG/CookBook/obj/Debug/net9.0/CookBook.pdb
 /home/gustavo/TG/CookBook/obj/Debug/net9.0/CookBook.genruntimeconfig.cache
 /home/gustavo/TG/CookBook/obj/Debug/net9.0/ref/CookBook.dll
+/home/gustavo/TG/CookBook/obj/Debug/net9.0/CookBook.sourcelink.json
