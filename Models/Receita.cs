@@ -29,6 +29,7 @@ namespace CookBook.Models
         public DateTime DataCriacao { get; set; }
 
         public ICollection<ReceitaCurtida>? ReceitaCurtidas { get; set; }
+        public ICollection<ReceitaSalva>? ReceitaSalvas { get; set; }
         
         public Receita() 
         {

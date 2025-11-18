@@ -10,5 +10,6 @@ namespace CookBook.ViewModels
         public int ReceitaId { get; set; }
         public int TotalCurtidas { get; set; }
         public bool IsLikedByCurrentUser { get; set; }
+        public bool IsSavedByCurrentUser { get; set; }
     }
 }

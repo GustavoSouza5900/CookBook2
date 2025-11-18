@@ -78,13 +78,15 @@ namespace CookBook.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var curtidas = receita.ReceitaCurtidas;
             var isLiked = curtidas != null && curtidas.Any(rc => rc.UserId == userId);
+            var isSaved = receita.ReceitaSalvas != null && receita.ReceitaSalvas.Any(rs => rs.UserId == userId);
 
             var viewModel = new ReceitaDetailsViewModel
             {
                 Receita = receita,
                 ReceitaId = receita.Id,
                 TotalCurtidas = curtidas?.Count ?? 0,
-                IsLikedByCurrentUser = isLiked
+                IsLikedByCurrentUser = isLiked,
+                IsSavedByCurrentUser = isSaved
             };
 
             return View(viewModel);
@@ -117,6 +119,89 @@ namespace CookBook.Controllers
             var novaContagem = await _context.ReceitaCurtida.CountAsync(rc => rc.ReceitaId == id);
 
             return Json(new { success = true, likeCount = novaContagem, isLiked = (curtidaExistente == null) });
+        }
+
+        // POST: Receitas/ToggleSave/5
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> ToggleSave(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            var receitaSalvaExistente = await _context.ReceitaSalva
+                .FirstOrDefaultAsync(rs => rs.ReceitaId == id && rs.UserId == userId);
+
+            bool isSaved;
+
+            if (receitaSalvaExistente != null)
+            {
+                _context.ReceitaSalva.Remove(receitaSalvaExistente);
+                isSaved = false;
+            }
+            else
+            {
+                var novaReceitaSalva = new ReceitaSalva
+                {
+                    ReceitaId = id,
+                    UserId = userId!
+                };
+                _context.ReceitaSalva.Add(novaReceitaSalva);
+                isSaved = true;
+            }
+
+            await _context.SaveChangesAsync();
+
+            // 2. Retorna a nova contagem de salvamentos (opcional)
+            var novaContagem = await _context.ReceitaSalva.CountAsync(rs => rs.ReceitaId == id);
+            
+            // Retorna um JSON com o resultado
+            return Json(new { success = true, isSaved = isSaved });
+        }
+
+        // GET: Receitas/ReceitasSalvas
+        [Authorize]
+        public async Task<IActionResult> ReceitasSalvas()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            var receitasSalvas = await _context.ReceitaSalva
+                .Include(rs => rs.Receita) 
+                    .ThenInclude(r => r.User) 
+                .Include(rs => rs.Receita)
+                    .ThenInclude(r => r.ReceitaCurtidas)
+                .Where(rs => rs.UserId == userId)
+                .Select(rs => rs.Receita) 
+                .ToListAsync();
+            
+            var viewModel = new ReceitaIndexViewModel
+            {
+                Receitas = receitasSalvas!,
+                SearchQuery = "Minhas Receitas Salvas" 
+            };
+
+            return View("Index", viewModel);
+        }
+
+        // GET: Receitas/MinhasReceitas
+        [Authorize]
+        public async Task<IActionResult> MinhasReceitas()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            var minhasReceitas = await _context.Receita
+                .Include(r => r.User)
+                .Include(r => r.ReceitaCurtidas)
+                .Include(r => r.ReceitaSalvas)
+                .Where(r => r.UserId == userId)
+                .ToListAsync();
+
+            var viewModel = new ReceitaIndexViewModel
+            {
+                Receitas = minhasReceitas,
+                SearchQuery = "Minhas Receitas (Autoria)"
+            };
+
+            return View("Index", viewModel);
         }
 
 

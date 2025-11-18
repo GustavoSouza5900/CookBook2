@@ -16,6 +16,7 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<Comentario> Comentario { get; set; }
     public DbSet<ReceitaIngrediente> ReceitaIngrediente { get; set; }
     public DbSet<ReceitaCurtida> ReceitaCurtida { get; set; }
+    public DbSet<ReceitaSalva> ReceitaSalva { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -75,6 +76,22 @@ public class ApplicationDbContext : IdentityDbContext
             .HasOne(rc => rc.User)
             .WithMany() // User não precisa de uma coleção de Curtidas
             .HasForeignKey(rc => rc.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+
+        builder.Entity<ReceitaSalva>()
+                .HasKey(rs => new { rs.ReceitaId, rs.UserId });
+
+        builder.Entity<ReceitaSalva>()
+            .HasOne(rs => rs.Receita)
+            .WithMany(r => r.ReceitaSalvas)
+            .HasForeignKey(rs => rs.ReceitaId)
+            .OnDelete(DeleteBehavior.Cascade); 
+        
+        builder.Entity<ReceitaSalva>()
+            .HasOne(rs => rs.User)
+            .WithMany()
+            .HasForeignKey(rs => rs.UserId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

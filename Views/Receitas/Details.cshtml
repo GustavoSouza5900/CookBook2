@@ -26,6 +26,12 @@
                         type="button">
                     <i class="fas fa-heart"></i>
                 </button>
+                <button id="saveButton" 
+                        data-receita-id="@Model.ReceitaId"
+                        class="btn @(Model.IsSavedByCurrentUser ? "btn-success" : "btn-outline-success") me-2"
+                        type="button">
+                    <i class="fas fa-bookmark"></i>
+                </button>
             }
             
             <span id="likeCountDisplay" class="fs-5">@Model.TotalCurtidas</span>
@@ -140,6 +146,36 @@
                 }
             } catch (error) {
                 console.error('Erro ao curtir/descurtir:', error);
+            }
+        });
+
+        document.getElementById('saveButton')?.addEventListener('click', async function() {
+            const button = this;
+            const receitaId = button.getAttribute('data-receita-id');
+            const url = `/Receitas/ToggleSave/${receitaId}`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Alterna o estilo do botão
+                    if (data.isSaved) {
+                        button.classList.remove('btn-outline-success');
+                        button.classList.add('btn-success');
+                    } else {
+                        button.classList.remove('btn-success');
+                        button.classList.add('btn-outline-success');
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao salvar/desalvar:', error);
             }
         });
     </script>
