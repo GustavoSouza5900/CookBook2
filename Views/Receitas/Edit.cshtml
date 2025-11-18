@@ -39,36 +39,38 @@
                 <input asp-for="NovaImagemArquivo" type="file" class="form-control" />
             </div>
             <div class="form-group mt-3">
-                <label class="control-label">Ingredientes Necessários</label>
-                <table class="table table-sm">
+                <label class="control-label">Adicionar Ingredientes</label>
+                
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <label for="IngredienteNome" class="form-label">Nome do Ingrediente</label>
+                        <input type="text" id="IngredienteNome" class="form-control" list="listaIngredientes" placeholder="Ex: Farinha de Trigo">
+                        
+                        <datalist id="listaIngredientes">
+                            @foreach(var item in ViewBag.IngredientesDisponiveis as List<CookBook.Models.Ingrediente> ?? new List<CookBook.Models.Ingrediente>())
+                            {
+                                <option value="@item.Nome"></option>
+                            }
+                        </datalist>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="IngredienteQuantidade" class="form-label">Quantidade</label>
+                        <input type="text" id="IngredienteQuantidade" class="form-control" placeholder="Ex: 2 xícaras">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-secondary w-100" onclick="adicionarIngrediente()">Adicionar</button>
+                    </div>
+                </div>
+
+                <table id="tabelaIngredientes" class="table table-striped">
                     <thead>
-                        <tr>
-                            <th style="width: 50px;">Sel.</th>
-                            <th>Ingrediente</th>
-                            <th>Quantidade (Ex: 2 colheres de sopa)</th>
-                        </tr>
+                        <tr><th>Ingrediente</th><th>Quantidade</th><th style="width: 50px;"></th></tr>
                     </thead>
-                    <tbody>
-                        @for (int i = 0; i < Model.Ingredientes.Count; i++)
-                        {
-                            var ingrediente = Model.Ingredientes[i];
-                            <tr>
-                                <td>
-                                    <input type="hidden" asp-for="@Model.Ingredientes[i].IngredienteId" />
-                                    <input type="hidden" asp-for="@Model.Ingredientes[i].NomeIngrediente" />
-                                    
-                                    <input type="checkbox" asp-for="@Model.Ingredientes[i].Selecionado" /> 
-                                </td>
-                                <td>
-                                    @ingrediente.NomeIngrediente
-                                </td>
-                                <td>
-                                    <input asp-for="@Model.Ingredientes[i].Quantidade" class="form-control form-control-sm" />
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
+                    <tbody></tbody>
                 </table>
+
+                <input type="hidden" asp-for="IngredientesInputData" id="ingredientesInputData" />
+                <span asp-validation-for="IngredientesInputData" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
@@ -81,3 +83,94 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        let ingredientesAdicionados = [];
+        const inputData = document.getElementById('ingredientesInputData');
+        const tabela = document.getElementById('tabelaIngredientes').getElementsByTagName('tbody')[0];
+        
+        function adicionarIngrediente() {
+            const nomeInput = document.getElementById('IngredienteNome');
+            const qtdInput = document.getElementById('IngredienteQuantidade');
+            const nome = nomeInput.value.trim();
+            const quantidade = qtdInput.value.trim();
+
+            if (!nome || !quantidade) {
+                alert('Por favor, preencha o Nome e a Quantidade dos ingredientes.');
+                return;
+            }
+
+            ingredientesAdicionados.push({ nome: nome, quantidade: quantidade });
+            
+            renderizarTabela();
+
+            nomeInput.value = '';
+            qtdInput.value = '';
+        }
+
+        function removerIngrediente(index) {
+            ingredientesAdicionados.splice(index, 1);
+            renderizarTabela();
+        }
+
+        function renderizarTabela() {
+            tabela.innerHTML = '';
+            let dataString = '';
+
+            ingredientesAdicionados.forEach((item, index) => {
+                // Cria a linha na tabela para exibição
+                const row = tabela.insertRow();
+                row.insertCell().textContent = item.nome;
+                row.insertCell().textContent = item.quantidade;
+                
+                const acaoCell = row.insertCell();
+                const btnRemover = document.createElement('button');
+                btnRemover.textContent = 'Remover';
+                btnRemover.className = 'btn btn-danger btn-sm';
+                btnRemover.type = 'button';
+                btnRemover.onclick = () => removerIngrediente(index);
+                acaoCell.appendChild(btnRemover);
+
+                // Atualiza a string formatada para o Controller (Nome|Quantidade;)
+                dataString += `${item.nome}|${item.quantidade};`;
+            });
+
+            // Atualiza o campo oculto que o Controller irá ler
+            inputData.value = dataString; 
+        }
+
+        // Se houver dados de validação de erro, carregamos eles (opcional, mas bom para UX)
+        // Se a validação falhar no POST, os dados virão no Model.IngredientesInputData
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Tenta obter os dados existentes do ViewModel (passados via JSON)
+            const jsonExistente = '@Html.Raw(Model.IngredientesExistentesJson)';
+            
+            if (jsonExistente && jsonExistente !== '[]') {
+                try {
+                    // 1. Deserializa os dados do JSON
+                    const dadosIniciais = JSON.parse(jsonExistente);
+                    
+                    // 2. Adiciona ao array e renderiza
+                    ingredientesAdicionados = dadosIniciais.map(item => ({
+                        nome: item.nome, 
+                        quantidade: item.quantidade
+                    }));
+                    renderizarTabela();
+                } catch (e) {
+                    console.error("Erro ao carregar JSON de ingredientes existentes:", e);
+                }
+            } 
+            // Se houver dados no campo oculto (erro de validação do POST), use a lógica do Create:
+            else if (inputData.value) {
+                const pairs = inputData.value.split(';').filter(p => p.length > 0);
+                pairs.forEach(pair => {
+                    const [nome, quantidade] = pair.split('|');
+                    ingredientesAdicionados.push({ nome, quantidade });
+                });
+                renderizarTabela();
+            }
+        });
+    </script>
+}

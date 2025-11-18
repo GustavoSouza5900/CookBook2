@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CookBook.Data;
 using CookBook.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using CookBook.ViewModels;
+using System.Text.Json;
 
 
 namespace CookBook.Controllers
@@ -218,8 +218,12 @@ namespace CookBook.Controllers
                 return Forbid(); 
             }
 
-            var todosIngredientes = _context.Ingrediente.ToList();
-            var ingredientesReceita = receita.ReceitaIngredientes!.ToDictionary(ri => ri.IngredienteId);
+            var ingredientesExistentes = receita.ReceitaIngredientes!
+                .Select(ri => new
+                {
+                    nome = ri.Ingrediente.Nome,
+                    quantidade = ri.Quantidade
+                }).ToList();
 
             var viewModel = new ReceitaEditViewModel
             {
@@ -229,19 +233,10 @@ namespace CookBook.Controllers
                 Instrucoes = receita.Instrucoes,
                 ImagemUrlExistente = receita.ImagemUrl,
                 
-                Ingredientes = todosIngredientes.Select(i =>
-                {
-                    var riExsitente = ingredientesReceita.GetValueOrDefault(i.Id);
-
-                    return new ReceitaIngredienteInputModel
-                    {
-                        IngredienteId = i.Id,
-                        NomeIngrediente = i.Nome,
-                        Selecionado = riExsitente != null,
-                        Quantidade = riExsitente?.Quantidade ?? string.Empty
-                    };
-                }).ToList()
+                IngredientesExistentesJson = JsonSerializer.Serialize(ingredientesExistentes)
             };
+
+            ViewBag.IngredientesDisponiveis = await _context.Ingrediente.ToListAsync();
 
             return View(viewModel);
         }
@@ -306,22 +301,46 @@ namespace CookBook.Controllers
 
                 _context.ReceitaIngrediente.RemoveRange(receitaDB.ReceitaIngredientes!);
 
-                var ingredientesSalvar = viewModel.Ingredientes
-                    .Where(i => i.Selecionado)
-                    .ToList();
-                
-                if (ingredientesSalvar.Any())
+                if (!string.IsNullOrEmpty(viewModel.IngredientesInputData))
                 {
-                    foreach (var input in ingredientesSalvar)
-                    {
-                        var receitaIngrediente = new ReceitaIngrediente
-                        {
-                            ReceitaId = receitaDB.Id,
-                            IngredienteId = input.IngredienteId,
-                            Quantidade = input.Quantidade ?? string.Empty
-                        };
+                    var inputIngredientes = viewModel.IngredientesInputData.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
-                        _context.ReceitaIngrediente.Add(receitaIngrediente);
+                    var ingredientesExistentes = await _context.Ingrediente.ToListAsync();
+                    var ingredientesMap = ingredientesExistentes.ToDictionary(i => i.Nome.ToLower());
+
+                    foreach (var input in inputIngredientes)
+                    {
+                        var partes = input.Split('|', 2);
+                        if (partes.Length != 2) continue;
+
+                        var nomeIngrediente = partes[0].Trim();
+                        var quantidade = partes[1].Trim();
+                        var nomeNormalizado = nomeIngrediente.ToLower();
+                        
+                        Ingrediente? ingrediente = null;
+
+                        // Busca Ingrediente Existente ou Cria Novo
+                        if (ingredientesMap.ContainsKey(nomeNormalizado))
+                        {
+                            ingrediente = ingredientesMap[nomeNormalizado];
+                        } else
+                        {
+                            ingrediente = new Ingrediente { Nome = nomeIngrediente };
+                            _context.Ingrediente.Add(ingrediente);
+                            await _context.SaveChangesAsync(); 
+                            ingredientesMap.Add(nomeNormalizado, ingrediente);
+                        }
+
+                        if (ingrediente != null)
+                        {
+                            var receitaIngrediente = new ReceitaIngrediente
+                            {
+                                ReceitaId = receitaDB.Id,
+                                IngredienteId = ingrediente.Id,
+                                Quantidade = quantidade
+                            };
+                            _context.ReceitaIngrediente.Add(receitaIngrediente);
+                        }
                     }
                 }
 
@@ -342,9 +361,7 @@ namespace CookBook.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            viewModel.IngredientesDisponiveis = _context.Ingrediente
-                .Select(i => new SelectListItem { Value = i.Id.ToString(), Text = i.Nome })
-                .ToList();
+            ViewBag.IngredientesDisponiveis = await _context.Ingrediente.ToListAsync();
             
             return View(viewModel);
         }
