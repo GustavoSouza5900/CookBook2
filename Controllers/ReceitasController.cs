@@ -40,11 +40,23 @@ namespace CookBook.Controllers
                     receitasQuery = receitasQuery.Where(r => r.Titulo.ToLower().Contains(termo));
                 } else if (viewModel.SearchType == "Ingredientes")
                 {
-                    receitasQuery = receitasQuery
-                        .Include(r => r.ReceitaIngredientes!)
-                        .ThenInclude(ri => ri.Ingrediente)
-                        .Where(r => r.ReceitaIngredientes!.Any(ri =>
-                            ri.Ingrediente.Nome.ToLower().Contains(termo)));
+                    var termosArray = termo.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(t => t.Trim().ToLower())
+                                        .ToList();
+                    
+                    if (termosArray.Count != 0)
+                    {
+                        receitasQuery = receitasQuery
+                            .Include(r => r.ReceitaIngredientes!)
+                                .ThenInclude(ri => ri.Ingrediente);
+                        
+                        foreach (var t in termosArray)
+                        {
+                            receitasQuery = receitasQuery
+                                .Where(r => r.ReceitaIngredientes!
+                                .Any(ri => ri.Ingrediente.Nome.ToLower().Contains(t)));
+                        }
+                    }
                 }
             }
             viewModel.Receitas = await receitasQuery.ToListAsync();
