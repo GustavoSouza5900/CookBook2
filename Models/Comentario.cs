@@ -14,6 +14,6 @@ namespace CookBook.Models
 
         // Relação com o Usuário (Quem comentou)
         public string UserId { get; set; } = string.Empty;
-        public IdentityUser User { get; set; } = null!; // O IdentityUser padrão
+        public ApplicationUser User { get; set; } = null!; // O IdentityUser padrão
     }
 }

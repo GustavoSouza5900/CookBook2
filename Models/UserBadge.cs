@@ -1,14 +1,15 @@
 using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
 
 namespace CookBook.Models
 {
-    public class ReceitaCurtida
+    public class UserBadge
     {
-        public int ReceitaId { get; set; }
-        public Receita? Receita { get; set; }
+        public int BadgeId { get; set; }
+        public Badge? Badge { get; set; }
 
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser? User { get; set; }
+        
+        public DateTime DateAchieved { get; set; } = DateTime.Now;
     }
 }

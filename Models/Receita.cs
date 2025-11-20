@@ -21,7 +21,7 @@ namespace CookBook.Models
         [NotMapped] 
         public IFormFile? ImagemArquivo { get; set; }
 
-        public IdentityUser User { get; set; } = null!;
+        public ApplicationUser User { get; set; } = null!;
 
         public ICollection<Comentario>? Comentarios { get; set; }
         

@@ -4,7 +4,7 @@ using CookBook.Models;
 
 namespace CookBook.Data;
 
-public class ApplicationDbContext : IdentityDbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -17,6 +17,8 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<ReceitaIngrediente> ReceitaIngrediente { get; set; }
     public DbSet<ReceitaCurtida> ReceitaCurtida { get; set; }
     public DbSet<ReceitaSalva> ReceitaSalva { get; set; }
+    public DbSet<Badge> Badge { get; set; }
+    public DbSet<UserBadge> UserBadge { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -92,6 +94,21 @@ public class ApplicationDbContext : IdentityDbContext
             .HasOne(rs => rs.User)
             .WithMany()
             .HasForeignKey(rs => rs.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<UserBadge>()
+            .HasKey(ub => new { ub.UserId, ub.BadgeId });
+        
+        builder.Entity<UserBadge>()
+            .HasOne(ub => ub.Badge)
+            .WithMany() 
+            .HasForeignKey(ub => ub.BadgeId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.Entity<UserBadge>()
+            .HasOne(ub => ub.User)
+            .WithMany() // ApplicationUser não precisa de uma lista de UserBadges
+            .HasForeignKey(ub => ub.UserId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

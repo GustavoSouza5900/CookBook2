@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using CookBook.ViewModels;
 using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
+using CookBook.Services;
 
 
 namespace CookBook.Controllers
@@ -15,11 +17,16 @@ namespace CookBook.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly GamificationService _gamificationService;
 
-        public ReceitasController(ApplicationDbContext context, IWebHostEnvironment hostEnvironment)
+        public ReceitasController(ApplicationDbContext context, IWebHostEnvironment hostEnvironment,
+                                    GamificationService gamificationService, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _hostEnvironment = hostEnvironment;
+            _gamificationService = gamificationService;
+            _userManager = userManager;
         }
 
         // GET: Receitas
@@ -130,6 +137,24 @@ namespace CookBook.Controllers
 
             var novaContagem = await _context.ReceitaCurtida.CountAsync(rc => rc.ReceitaId == id);
 
+            // dar xp para autor da receita curtida
+            var receita = await _context.Receita.FirstOrDefaultAsync(r => r.Id == id);
+            var autorReceita = await _userManager.FindByIdAsync(receita!.UserId);
+
+            if (autorReceita is ApplicationUser appAutor)
+            {
+                if (curtidaExistente == null) // Se for curtida
+                {
+                    appAutor.TotalLikesReceived++;
+                    await _gamificationService.AddExpAsync(appAutor, 5); // Ganha 5 EXP
+                }
+                else // Se for descurtida
+                {
+                    appAutor.TotalLikesReceived--;
+                }
+                await _userManager.UpdateAsync(appAutor);
+            }
+            
             return Json(new { success = true, likeCount = novaContagem, isLiked = (curtidaExistente == null) });
         }
 
@@ -343,8 +368,14 @@ namespace CookBook.Controllers
                     }
                     await _context.SaveChangesAsync(); // salva os ReceitaIngredientes
                 }
-                
+
+                var user = await _userManager.GetUserAsync(User);
+                if (user is ApplicationUser appUser)
+                {
+                    await _gamificationService.AddExpAsync(appUser, 100); // Ganha 100 EXP
+                }
             }  
+
             return RedirectToAction(nameof(Index));
         }
 
