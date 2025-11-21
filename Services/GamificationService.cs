@@ -46,16 +46,78 @@ public class GamificationService
         if (eventType == "NEW_RECIPE_PUBLISHED")
         {
             var recipeCount = await _context.Receita.CountAsync(r => r.UserId == user.Id);
-            
-            // Badge: Chef Júnior (5 Receitas)
-            if (recipeCount >= 5 && !await _context.UserBadge.AnyAsync(ub => ub.UserId == user.Id && ub.Badge.Name == "Chef Júnior"))
+
+            // Chef Novato
+            if (recipeCount >= 1 && !await _context.UserBadge.AnyAsync(ub => ub.UserId == user.Id && ub.Badge!.Name == "Chef Novato"))
             {
-                var chefJunior = await _context.Badge.FirstOrDefaultAsync(b => b.TriggerEvent == "RECIPE_COUNT_5");
-                if (chefJunior != null)
+                var badge = await _context.Badge.FirstOrDefaultAsync(b => b.TriggerEvent == "RECIPE_COUNT_1");
+                if (badge != null)
                 {
-                    _context.UserBadge.Add(new UserBadge { UserId = user.Id, BadgeId = chefJunior.Id });
+                    _context.UserBadge.Add(new UserBadge {UserId = user.Id, BadgeId = badge.Id});
                     await _context.SaveChangesAsync();
-                    // Notificar o usuário
+                }
+            }
+            
+            // Mestre Culinário
+            if (recipeCount >= 10 && !await _context.UserBadge.AnyAsync(ub => ub.UserId == user.Id && ub.Badge!.Name == "Mestre Culinário"))
+            {
+                var badge = await _context.Badge.FirstOrDefaultAsync(b => b.TriggerEvent == "RECIPE_COUNT_10");
+                if (badge != null)
+                {
+                    _context.UserBadge.Add(new UserBadge {UserId = user.Id, BadgeId = badge.Id});
+                    await _context.SaveChangesAsync();
+                }
+            }
+        }
+
+        else if (eventType == "LIKE_COUNT_UPDATED")
+        {
+            // Primeira de Muitas
+            if (user.TotalLikesReceived >= 1 && !await _context.UserBadge.AnyAsync(ub => ub.UserId == user.Id && ub.Badge!.Name == "Primeira de Muitas"))
+            {
+                var badge = await _context.Badge.FirstOrDefaultAsync(b => b.TriggerEvent == "TOTAL_LIKES_1");
+                if (badge != null)
+                {
+                    _context.UserBadge.Add(new UserBadge {UserId = user.Id, BadgeId = badge.Id});
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            // Popular
+            if (user.TotalLikesReceived >= 50 && !await _context.UserBadge.AnyAsync(ub => ub.UserId == user.Id && ub.Badge!.Name == "Popular"))
+            {
+                var badge = await _context.Badge.FirstOrDefaultAsync(b => b.TriggerEvent == "TOTAL_LIKES_50");
+                if (badge != null)
+                {
+                    _context.UserBadge.Add(new UserBadge {UserId = user.Id, BadgeId = badge.Id});
+                    await _context.SaveChangesAsync();
+                }
+            }
+        }
+        
+        else if (eventType == "NEW_COMMENT_PUBLISHED")
+        {
+            var commentCount = await _context.Comentario.CountAsync(c => c.UserId == user.Id);
+
+            // Opnião Própria
+            if (commentCount >= 1 && !await _context.UserBadge.AnyAsync(ub => ub.UserId == user.Id && ub.Badge!.Name == "Opnião Própria"))
+            {
+                var badge = await _context.Badge.FirstOrDefaultAsync(b => b.TriggerEvent == "COMMENT_COUNT_1");
+                if (badge != null)
+                {
+                    _context.UserBadge.Add(new UserBadge {UserId = user.Id, BadgeId = badge.Id});
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            // Comentarista Ativo
+            if (commentCount >= 5 && !await _context.UserBadge.AnyAsync(ub => ub.UserId == user.Id && ub.Badge!.Name == "Comentarista Ativo"))
+            {
+                var badge = await _context.Badge.FirstOrDefaultAsync(b => b.TriggerEvent == "COMMENT_COUNT_5");
+                if (badge != null)
+                {
+                    _context.UserBadge.Add(new UserBadge {UserId = user.Id, BadgeId = badge.Id});
+                    await _context.SaveChangesAsync();
                 }
             }
         }

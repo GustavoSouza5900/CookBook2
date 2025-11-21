@@ -110,5 +110,50 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany() // ApplicationUser não precisa de uma lista de UserBadges
             .HasForeignKey(ub => ub.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Badge>().HasData(
+            new Badge { 
+                Id = 1,
+                Name = "Chef Novato", 
+                Description = "Publique sua primeira receita.", 
+                IconClass = "fas fa-star", 
+                TriggerEvent = "RECIPE_COUNT_1" 
+            },
+            new Badge { 
+                Id = 2,
+                Name = "Mestre Culinário", 
+                Description = "Publique 10 receitas.", 
+                IconClass = "fas fa-trophy", 
+                TriggerEvent = "RECIPE_COUNT_10" 
+            },
+            new Badge { 
+                Id = 3,
+                Name = "Primeira de Muitas", 
+                Description = "Receba 1 curtidas no total.", 
+                IconClass = "fas fa-heart", 
+                TriggerEvent = "TOTAL_LIKES_1" 
+            },
+            new Badge { 
+                Id = 4,
+                Name = "Popular", 
+                Description = "Receba 50 curtidas no total.", 
+                IconClass = "fas fa-fire", 
+                TriggerEvent = "TOTAL_LIKES_50" 
+            },
+            new Badge { 
+                Id = 5,
+                Name = "Opnião Própria", 
+                Description = "Publique seu primeiro comentário", 
+                IconClass = "fas fa-comment", 
+                TriggerEvent = "COMMENT_COUNT_1" 
+            },
+            new Badge { 
+                Id = 6,
+                Name = "Comentarista Ativo", 
+                Description = "Publique 5 comentários.", 
+                IconClass = "fas fa-comments", 
+                TriggerEvent = "COMMENT_COUNT_5" 
+            }
+        );
     }
 }

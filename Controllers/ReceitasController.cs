@@ -153,6 +153,8 @@ namespace CookBook.Controllers
                     appAutor.TotalLikesReceived--;
                 }
                 await _userManager.UpdateAsync(appAutor);
+
+                await _gamificationService.CheckAndAwardBadge(appAutor, "LIKE_COUNT_UPDATED");
             }
             
             return Json(new { success = true, likeCount = novaContagem, isLiked = (curtidaExistente == null) });
@@ -264,6 +266,12 @@ namespace CookBook.Controllers
             _context.Comentario.Add(comentario);
             await _context.SaveChangesAsync();
 
+            var user = await _userManager.FindByIdAsync(comentario.UserId);
+            if (user != null)
+            {
+                await _gamificationService.AddExpAsync(user, 10);
+                await _gamificationService.CheckAndAwardBadge(user, "NEW_COMMENT_PUBLISHED");
+            }
             // Redireciona para a mesma página de detalhes (Details)
             return RedirectToAction(nameof(Details), new { id = viewModel.ReceitaId });
         }
@@ -373,6 +381,7 @@ namespace CookBook.Controllers
                 if (user is ApplicationUser appUser)
                 {
                     await _gamificationService.AddExpAsync(appUser, 100); // Ganha 100 EXP
+                    await _gamificationService.CheckAndAwardBadge(appUser, "NEW_RECIPE_PUBLISHED"); // verifica se ganha badge nova
                 }
             }  
 
