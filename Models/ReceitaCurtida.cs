@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
-
 namespace CookBook.Models
 {
     public class ReceitaCurtida

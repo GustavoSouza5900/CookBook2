@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-
 namespace CookBook.Models
 {
     public class Comentario
@@ -14,6 +12,6 @@ namespace CookBook.Models
 
         // Relação com o Usuário (Quem comentou)
         public string UserId { get; set; } = string.Empty;
-        public ApplicationUser User { get; set; } = null!; // O IdentityUser padrão
+        public ApplicationUser User { get; set; } = null!; 
     }
 }

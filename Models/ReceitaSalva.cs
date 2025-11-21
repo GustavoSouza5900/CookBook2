@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-
 namespace CookBook.Models
 {
     public class ReceitaSalva

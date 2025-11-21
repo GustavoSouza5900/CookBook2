@@ -205,9 +205,9 @@ namespace CookBook.Controllers
             
             var receitasSalvas = await _context.ReceitaSalva
                 .Include(rs => rs.Receita) 
-                    .ThenInclude(r => r.User) 
+                    .ThenInclude(r => r!.User) 
                 .Include(rs => rs.Receita)
-                    .ThenInclude(r => r.ReceitaCurtidas)
+                    .ThenInclude(r => r!.ReceitaCurtidas)
                 .Where(rs => rs.UserId == userId)
                 .Select(rs => rs.Receita) 
                 .ToListAsync();

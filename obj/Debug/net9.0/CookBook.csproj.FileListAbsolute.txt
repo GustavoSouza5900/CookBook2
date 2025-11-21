@@ -291,6 +291,7 @@
 /home/gustavo/TG/CookBook/obj/Debug/net9.0/CookBook.MvcApplicationPartsAssemblyInfo.cache
 /home/gustavo/TG/CookBook/obj/Debug/net9.0/CookBook.RazorAssemblyInfo.cache
 /home/gustavo/TG/CookBook/obj/Debug/net9.0/CookBook.RazorAssemblyInfo.cs
+/home/gustavo/TG/CookBook/obj/Debug/net9.0/CookBook.sourcelink.json
 /home/gustavo/TG/CookBook/obj/Debug/net9.0/rjimswa.dswa.cache.json
 /home/gustavo/TG/CookBook/obj/Debug/net9.0/rjsmrazor.dswa.cache.json
 /home/gustavo/TG/CookBook/obj/Debug/net9.0/rjsmcshtml.dswa.cache.json
@@ -433,4 +434,3 @@
 /home/gustavo/TG/CookBook/obj/Debug/net9.0/CookBook.pdb
 /home/gustavo/TG/CookBook/obj/Debug/net9.0/CookBook.genruntimeconfig.cache
 /home/gustavo/TG/CookBook/obj/Debug/net9.0/ref/CookBook.dll
-/home/gustavo/TG/CookBook/obj/Debug/net9.0/CookBook.sourcelink.json

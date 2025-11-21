@@ -105,7 +105,7 @@ public class GamificationService
                 var badge = await _context.Badge.FirstOrDefaultAsync(b => b.TriggerEvent == "COMMENT_COUNT_1");
                 if (badge != null)
                 {
-                    _context.UserBadge.Add(new UserBadge {UserId = user.Id, BadgeId = badge.Id});
+                    _context.UserBadge.Add(new UserBadge {UserId = user.Id, BadgeId = badge.Id, DateAchieved = DateTime.Now});
                     await _context.SaveChangesAsync();
                 }
             }
