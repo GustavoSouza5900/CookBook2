@@ -1,45 +1,64 @@
 @model CookBook.ViewModels.ReceitaEditViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Receita";
 }
 
-<h1>Edit</h1>
+<h1 class="mb-4">Editar Receita</h1>
 
-<h4>Receita</h4>
-<hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-lg-10 mx-auto">
         <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Titulo" class="control-label"></label>
-                <input asp-for="Titulo" class="form-control" />
-                <span asp-validation-for="Titulo" class="text-danger"></span>
+
+            <div class="card p-4 shadow-sm mb-4">
+                <h5 class="card-title text-success"><i class="fas fa-utensils me-2"></i> Informações Básicas</h5>
+                
+                <div class="mb-3">
+                    <label asp-for="Titulo" class="form-label"></label>
+                    <input asp-for="Titulo" class="form-control" />
+                    <span asp-validation-for="Titulo" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="TempoPreparoMinutos" class="form-label"></label>
+                        <input asp-for="TempoPreparoMinutos" class="form-control" type="number" min="1" />
+                        <span asp-validation-for="TempoPreparoMinutos" class="text-danger"></span>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="TempoPreparoMinutos" class="control-label"></label>
-                <input asp-for="TempoPreparoMinutos" class="form-control" />
-                <span asp-validation-for="TempoPreparoMinutos" class="text-danger"></span>
+
+            <div class="card p-4 shadow-sm mb-4">
+                <h5 class="card-title text-warning"><i class="fas fa-list-ol me-2"></i> Instruções / Modo de Preparo</h5>
+                <p class="text-muted small">Escreva os passos detalhadamente, um passo por linha.</p>
+
+                <div class="mb-3">
+                    <label asp-for="Instrucoes" class="form-label"></label>
+                    <textarea asp-for="Instrucoes" class="form-control" rows="15"></textarea>
+                    <span asp-validation-for="Instrucoes" class="text-danger"></span>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Instrucoes" class="control-label"></label>
-                <input asp-for="Instrucoes" class="form-control" />
-                <span asp-validation-for="Instrucoes" class="text-danger"></span>
-            </div>
-            <div class="form-group">
+
+            <div class="card p-4 shadow-sm mb-4">
+                <h5 class="card-title text-primary"><i class="fas fa-image me-2"></i> Imagem de Capa</h5>
+                
                 @if (!string.IsNullOrEmpty(Model.ImagemUrlExistente))
                 {
-                    <label class="control-label">Imagem Atual:</label><br />
-                    <img src="@Model.ImagemUrlExistente" style="max-width: 200px; height: auto;" class="mb-2" />
+                    <label class="form-label">Imagem Atual:</label>
+                    <img src="@Model.ImagemUrlExistente" style="max-width: 300px; height: auto;" class="img-thumbnail mb-3" />
                 }
 
-                <label asp-for="NovaImagemArquivo" class="control-label">Nova Imagem de Capa</label>
-                <input asp-for="NovaImagemArquivo" type="file" class="form-control" />
+                <div class="mb-3">
+                    <label asp-for="NovaImagemArquivo" class="form-label">Nova Imagem (Opcional)</label>
+                    <input asp-for="NovaImagemArquivo" type="file" class="form-control" accept="image/*" />
+                </div>
             </div>
-            <div class="form-group mt-3">
-                <label class="control-label">Adicionar Ingredientes</label>
+            
+            <div class="card p-4 shadow-sm mb-4">
+                <h5 class="card-title text-info"><i class="fas fa-list-ul me-2"></i> Ingredientes</h5>
+                <p class="text-muted small">Use a tabela para gerenciar os ingredientes desta receita.</p>
                 
                 <div class="row mb-3">
                     <div class="col-md-5">
@@ -62,9 +81,9 @@
                     </div>
                 </div>
 
-                <table id="tabelaIngredientes" class="table table-striped">
+                <table id="tabelaIngredientes" class="table table-striped table-bordered">
                     <thead>
-                        <tr><th>Ingrediente</th><th>Quantidade</th><th style="width: 50px;"></th></tr>
+                        <tr><th>Ingrediente</th><th>Quantidade</th><th style="width: 50px;">Ação</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -72,16 +91,15 @@
                 <input type="hidden" asp-for="IngredientesInputData" id="ingredientesInputData" />
                 <span asp-validation-for="IngredientesInputData" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-5">
+                <input type="submit" value="Salvar Alterações" class="btn btn-primary btn-lg shadow-sm" />
+                <a asp-action="Index" class="btn btn-outline-secondary btn-lg">Voltar à Lista</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
@@ -147,9 +165,10 @@
             // Tenta obter os dados existentes do ViewModel (passados via JSON)
             const jsonExistente = '@Html.Raw(Model.IngredientesExistentesJson)';
             
-            if (jsonExistente && jsonExistente !== '[]') {
+            if (jsonExistente && jsonExistente !== '[]' && jsonExistente !== '') {
                 try {
                     // 1. Deserializa os dados do JSON
+                    // O Html.Raw garante que a string JSON seja interpretada corretamente
                     const dadosIniciais = JSON.parse(jsonExistente);
                     
                     // 2. Adiciona ao array e renderiza

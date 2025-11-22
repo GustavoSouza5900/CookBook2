@@ -1,0 +1,59 @@
+@using CookBook.Models
+@using System.Security.Claims
+@model IEnumerable<dynamic> 
+@{
+    ViewData["Title"] = "Ranking Global de Chefs";
+    int rank = 0;
+    string currentUserId = ViewBag.CurrentUserId as string ?? "";
+}
+
+<h1 class="text-center">🏆 Ranking Global de Chefs</h1>
+<p class="text-center text-muted">Baseado no número total de curtidas recebidas.</p>
+<hr />
+
+<div class="table-responsive">
+    <table class="table table-hover table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nome de Usuário</th>
+                <th scope="col" class="text-center">Nível</th>
+                <th scope="col" class="text-center">Curtidas Recebidas</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var userEntry in Model)
+            {
+                rank++;
+                // 💡 Condição para destacar o usuário logado
+                bool isCurrentUser = userEntry.Id == currentUserId;
+                
+                <tr class="@(isCurrentUser ? "table-primary fw-bold" : "")">
+                    <th scope="row">
+                        @(rank == 1 ? "🥇" : rank == 2 ? "🥈" : rank == 3 ? "🥉" : rank.ToString())
+                    </th>
+                    <td>
+                        @userEntry.UserName
+                        @if (isCurrentUser)
+                        {
+                            <span class="badge bg-primary ms-2">Você</span>
+                        }
+                    </td>
+                    <td class="text-center">
+                        @userEntry.Level
+                    </td>
+                    <td class="text-center">
+                        <i class="fas fa-heart text-danger me-1"></i> @userEntry.TotalLikesReceived
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning text-center">
+        Nenhum usuário encontrado no ranking. Comece a criar receitas!
+    </div>
+}

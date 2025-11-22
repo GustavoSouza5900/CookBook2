@@ -25,7 +25,7 @@ namespace CookBook.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Ranking()
         {
-            var ranking = await _userManager!.Users
+            var ranking = await _userManager.Users
                 .OfType<ApplicationUser>() // 
                 .OrderByDescending(u => u.TotalLikesReceived)
                 .ThenByDescending(u => u.Level)
@@ -33,10 +33,13 @@ namespace CookBook.Controllers
                 {
                     u.UserName,
                     u.Level,
-                    u.TotalLikesReceived
+                    u.TotalLikesReceived,
+                    u.Id
                 })
                 .Take(50) 
                 .ToListAsync();
+
+            ViewBag.CurrentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             return View(ranking);
         }

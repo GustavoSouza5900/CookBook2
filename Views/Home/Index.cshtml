@@ -1,8 +1,91 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Bem-vindo ao CookBook: Sua Jornada Culinária";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center p-5 bg-light rounded-3 shadow-sm mb-5">
+    <h1 class="display-3 fw-bold text-success">Bem-vindo(a) à Sua Cozinha Digital!</h1>
+    <p class="lead">
+        O CookBook é mais do que um lugar para compartilhar receitas; é uma comunidade de Chefs. 
+        Suba de nível, ganhe Badges exclusivos e torne-se uma lenda culinária.
+    </p>
+    <hr class="my-4">
+    <a class="btn btn-success btn-lg" asp-controller="Receitas" asp-action="Create" role="button">
+        <i class="fas fa-plus-circle me-2"></i> Publique Sua Primeira Receita Agora!
+    </a>
+</div>
+
+<div class="row mt-5">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100 shadow-sm border-success">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-award me-2"></i> Sua Jornada de Chef (EXP)</h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Cada ação na comunidade recompensa você com Pontos de Experiência (EXP), essenciais para subir de Nível e desbloquear novos Badges.
+                </p>
+                <table class="table table-striped table-hover mt-3">
+                    <thead>
+                        <tr>
+                            <th>Ação</th>
+                            <th class="text-end">Recompensa em EXP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="fas fa-utensils text-primary me-2"></i> Publicar uma Nova Receita</td>
+                            <td class="text-end fw-bold text-success">+100 EXP</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-comment-dots text-info me-2"></i> Fazer um Comentário</td>
+                            <td class="text-end fw-bold text-success">+10 EXP</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-heart text-danger me-2"></i> Receber uma Curtida</td>
+                            <td class="text-end fw-bold text-success">+5 EXP</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-medal text-warning me-2"></i> Conquistar um Novo Badge</td>
+                            <td class="text-end fw-bold text-success">Bônus de EXP (Variável)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <a asp-controller="Profile" asp-action="Ranking" class="btn btn-outline-success w-100 mt-3">
+                    <i class="fas fa-trophy me-2"></i> Ver o Ranking Global!
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100 shadow-sm border-info">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-clipboard-list me-2"></i> Comece Agora!</h4>
+            </div>
+            <div class="card-body">
+                <p>Aqui estão algumas ideias para começar a sua jornada no CookBook:</p>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="fas fa-pencil-alt text-muted me-2"></i> 
+                        Registre-se para salvar suas receitas favoritas.
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-lightbulb text-muted me-2"></i> 
+                        Publique uma receita simples para ganhar seu primeiro Badge!
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-search text-muted me-2"></i> 
+                        Explore a lista de receitas e deixe sua opinião nos comentários.
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-star text-muted me-2"></i> 
+                        Curta as receitas de outros Chefs para incentivá-los.
+                    </li>
+                </ul>
+                <a asp-controller="Receitas" asp-action="Index" class="btn btn-outline-info w-100 mt-3">
+                    <i class="fas fa-book-open me-2"></i> Explorar Receitas
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
