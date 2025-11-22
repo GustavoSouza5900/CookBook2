@@ -34,7 +34,8 @@ namespace CookBook.Controllers
                     u.UserName,
                     u.Level,
                     u.TotalLikesReceived,
-                    u.Id
+                    u.Id,
+                    ProfilePictureUrl = u.ProfilePictureUrl
                 })
                 .Take(50) 
                 .ToListAsync();
@@ -77,6 +78,7 @@ namespace CookBook.Controllers
                 ExperiencePoints = user.ExperiencePoints,
                 ExpToNextLevel = expRequired,
                 AchievedBadges = achievedBadges,
+                ProfilePictureUrl = user.ProfilePictureUrl // Assumindo que ApplicationUser tem esta propriedade
             };
 
             return View(viewModel);

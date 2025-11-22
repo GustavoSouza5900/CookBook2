@@ -1,103 +1,234 @@
 @model CookBook.ViewModels.ReceitaIndexViewModel
 
 @{
-    ViewData["Title"] = "Receitas";
+    ViewData["Title"] = "Receitas - CookBook";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cookbook-styles.css">
 }
 
 
-<h1>Receitas</h1>
-<hr />
-
-<form asp-controller="Receitas" asp-action="Index" method="get" class="mb-4">
-    <div class="input-group mb-3">
-        <input type="text" 
-               class="form-control" 
-               placeholder="Pesquisar por nome ou ingredientes separados por vírgula (Ex: frango, arroz)..." 
-               name="searchQuery" 
-               value="@Model.SearchQuery" />
-        
-        <button class="btn btn-primary" type="submit">
-            <i class="fas fa-search"></i> Pesquisar
-        </button>
+    
+    @* Mobile Menu *@
+    <div class="mobile-menu" id="mobileMenu">
+        <a asp-controller="Home" asp-action="Index" class="mobile-nav-link">
+            <i class="fas fa-home"></i>
+            Início
+        </a>
+        <a asp-controller="Receitas" asp-action="Index" class="mobile-nav-link">
+            <i class="fas fa-book-open"></i>
+            Receitas
+        </a>
+        <a asp-controller="Profile" asp-action="Ranking" class="mobile-nav-link">
+            <i class="fas fa-trophy"></i>
+            Ranking
+        </a>
+        <a asp-controller="Profile" asp-action="Index" class="mobile-nav-link">
+            <i class="fas fa-user"></i>
+            Perfil
+        </a>
+        <a asp-controller="Account" asp-action="Register" class="mobile-btn-register">
+            <i class="fas fa-user-plus"></i>
+            Cadastrar
+        </a>
     </div>
-
-    <div class="d-flex gap-4">
-        <div class="form-check">
-            <input class="form-check-input" 
-                   type="radio" 
-                   name="searchType" 
-                   id="radioNome" 
-                   value="Nome"
-                   checked="@(Model.SearchType == "Nome")">
-            <label class="form-check-label" for="radioNome">
-                Pesquisar por Nome
-            </label>
+    
+    <div class="navbar-spacer"></div>
+    
+    @* ========== RECIPES PAGE ========== *@
+    <main class="recipes-page">
+        
+        @* Page Header *@   
+        <div class="recipes-header">
+            <h1><i class="fas fa-book-open"></i> Receitas</h1>
+            <p>Descubra pratos incríveis criados pela nossa comunidade de chefs</p>
         </div>
         
-        <div class="form-check">
-            <input class="form-check-input" 
-                   type="radio" 
-                   name="searchType" 
-                   id="radioIngredientes" 
-                   value="Ingredientes"
-                   checked="@(Model.SearchType == "Ingredientes")">
-            <label class="form-check-label" for="radioIngredientes">
-                Pesquisar por Ingredientes
-            </label>
+        @* Search Section *@
+        <form asp-controller="Receitas" asp-action="Index" method="get" class="search-section">
+            <div class="search-input-wrapper">
+                <input type="text" 
+                       placeholder="Pesquisar por nome ou ingredientes (ex: frango, arroz)..." 
+                       name="searchQuery" 
+                       value="@Model.SearchQuery" />
+                <button class="btn-search" type="submit">
+                    <i class="fas fa-search"></i>
+                    <span>Pesquisar</span>
+                </button>
+            </div>
+            
+            <div class="search-type-toggle">
+                <div class="search-type-option">
+                    <input type="radio" 
+                           name="searchType" 
+                           id="radioNome" 
+                           value="Nome"
+                           @(Model.SearchType == "Nome" || string.IsNullOrEmpty(Model.SearchType) ? "checked" : "")>
+                    <label for="radioNome">
+                        <i class="fas fa-font"></i>
+                        Por Nome
+                    </label>
+                </div>
+                
+                <div class="search-type-option">
+                    <input type="radio" 
+                           name="searchType" 
+                           id="radioIngredientes" 
+                           value="Ingredientes"
+                           @(Model.SearchType == "Ingredientes" ? "checked" : "")>
+                    <label for="radioIngredientes">
+                        <i class="fas fa-carrot"></i>
+                        Por Ingredientes
+                    </label>
+                </div>
+            </div>
+        </form>
+        
+        @* New Recipe Button *@
+        <div class="new-recipe-section">
+            <a asp-action="Create" class="btn-new-recipe">
+                <i class="fas fa-plus"></i>
+                Publicar Nova Receita
+            </a>
         </div>
-    </div>
-</form>
-
-<hr />
-
-<p>
-    <a asp-action="Create">Nova Receita</a>
-</p>
-
-<hr />
-
-@* 1. LOOP DE RECEITAS (Card View) *@
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    @if (Model.Receitas.Any())
-    {
-        @foreach (var item in Model.Receitas)
-        {
-            <div class="col">
-                <a asp-action="Details" asp-route-id="@item.Id" class="card h-100 text-decoration-none text-dark shadow-sm">
-                    
-                    @* 1. Imagem da Receita *@
-                    <img src="@item.ImagemUrl" 
-                         class="card-img-top" 
-                         alt="Imagem da receita @item.Titulo"
-                         style="height: 200px; object-fit: cover;">
-                    
-                    <div class="card-body">
-                        @* 2. Nome da Receita (Título) *@
-                        <h5 class="card-title text-truncate">@item.Titulo</h5>
-                        
-                        @* 3. Informações Essenciais *@
-                        <p class="card-text mb-1">
-                            <small class="text-muted">Por: **@item.User.UserName**</small>
-                        </p>
-                        <p class="card-text mb-1">
-                            <small class="text-muted">Tempo: **@item.TempoPreparoMinutos** min.</small>
-                        </p>
-                        
-                        <div class="mt-2">
-                            <small class="text-info">Data: **@item.DataCriacao.ToString("dd/MM/yyyy")**</small> 
-                            <small class="text-danger ms-2"><i class="fas fa-heart"></i> **@item.ReceitaCurtidas!.Count**</small>
+        
+        @* Recipe Feed *@
+        <div class="recipe-feed">
+            @if (Model.Receitas.Any())
+            {
+                @foreach (var item in Model.Receitas)
+                {
+                    <a asp-action="Details" asp-route-id="@item.Id" class="recipe-card">
+                        <div class="recipe-card-image">
+                            <img src="@item.ImagemUrl" 
+                                 alt="@item.Titulo" 
+                                 loading="lazy">
                         </div>
-                    </div>
-                </a>
-            </div>
-        }
-    }
-    else
-    {
-        <div class="col-12">
-            <div class="alert alert-warning" role="alert">
-                Nenhuma receita encontrada. Tente outra pesquisa.
-            </div>
-        </div>
-    }
+                        
+                        <div class="recipe-card-content">
+                            <h2 class="recipe-card-title">@item.Titulo</h2>
+                            
+                            <div class="recipe-card-author">
+ @{
+ var user = item.User;
+ 
+        // Verifica se a URL da foto existe E se NÃO é a URL da foto padrão
+ bool hasActualProfilePicture = 
+ !string.IsNullOrEmpty(user?.ProfilePictureUrl) &&
+ !user.ProfilePictureUrl.Contains("default-profile.png");
+ }
+
+ @if (hasActualProfilePicture)
+ {
+ <img src="@user?.ProfilePictureUrl" 
+alt="Foto de @(user?.UserName ?? "Autor Desconhecido")" 
+class="feed-avatar-img" />
+ }
+ else
+ {
+ <div class="feed-avatar-text">
+ @user?.UserName?.Substring(0, 1).ToUpper()
 </div>
+ }
+ 
+ <div class="author-info">
+ <span class="author-name">@(item.User?.UserName ?? "Chef Anônimo")</span>
+ <span class="recipe-date">@item.DataCriacao.ToString("dd 'de' MMMM 'de' yyyy")</span>
+ </div>
+</div>
+                            
+                            <div class="recipe-card-meta">
+                                <div class="meta-item time">
+                                    <i class="fas fa-clock"></i>
+                                    <span>@item.TempoPreparoMinutos min</span>
+                                </div>
+                                <div class="meta-item likes">
+                                    <i class="fas fa-heart"></i>
+                                    <span>@item.ReceitaCurtidas!.Count curtidas</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            }
+            else
+            {
+                <div class="recipe-empty">
+                    <div class="recipe-empty-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Nenhuma receita encontrada</h3>
+                    <p>Tente outra pesquisa ou seja o primeiro a publicar uma receita incrível!</p>
+                </div>
+            }
+        </div>
+        
+    </main>
+    
+</div>
+
+@section Scripts {
+    <script>
+        // Toggle Mobile Menu
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuIcon = document.getElementById('menuIcon');
+            
+            mobileMenu.classList.toggle('active');
+            
+            if (mobileMenu.classList.contains('active')) {
+                menuIcon.classList.remove('fa-bars');
+                menuIcon.classList.add('fa-times');
+            } else {
+                menuIcon.classList.remove('fa-times');
+                menuIcon.classList.add('fa-bars');
+            }
+        }
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            if (!mobileMenu.contains(event.target) && !menuToggle.contains(event.target)) {
+                mobileMenu.classList.remove('active');
+                document.getElementById('menuIcon').classList.remove('fa-times');
+                document.getElementById('menuIcon').classList.add('fa-bars');
+            }
+        });
+        
+        // Animação de entrada dos cards ao scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.recipe-card, .search-section, .new-recipe-section').forEach(function(el) {
+                el.style.animationPlayState = 'paused';
+                observer.observe(el);
+            });
+        });
+    </script>
+}

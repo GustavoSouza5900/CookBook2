@@ -3,82 +3,242 @@
     ViewData["Title"] = "Conquistas e Nível";
 }
 
+@section Styles {
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:wght@400;600;700&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="~/css/cookbook-styles.css">
+}
 
-<h1>@ViewData["Title"]</h1>
-<hr />
-
+@* ========================================================== *@
+@* ESTE É O BLOCO DE CÓDIGO QUE VOCÊ DEVE SUBSTITUIR:          *@
+@* Ele calcula a porcentagem usando o XP de progresso correto. *@
 @{
-    double percent = 0;
-    // Evita divisão por zero se o ExpToNextLevel for 0
-    if (Model.ExpToNextLevel > 0) 
-    {
-        percent = ((double)Model.ExperiencePoints / Model.ExpToNextLevel) * 100;
-        if (percent > 100) percent = 100; // Caso o usuário tenha EXP suficiente para o próximo nível
-    }
-    
-    // EXP remanescente para o nível atual
+    // Obtém o XP acumulado até o nível anterior. Se for Nível 1, o XP anterior é 0.
     int expCurrentLevel = Model.Level == 1 ? 0 : CookBook.Services.GamificationService.GetExpToNextLevel(Model.Level - 1);
-    int expProgress = Model.ExperiencePoints; // Aqui é o EXP acumulado no nível atual
-}
-
-<div class="card p-4 mb-5 shadow-sm">
-    <div class="d-flex align-items-center">
-        @* 💡 Espaço para Imagem de Perfil (futuramente) *@
-        <i class="fas fa-user-circle fa-4x text-primary me-4"></i>
-        
-        <div>
-            <h2>@Model.UserName</h2>
-            <p class="text-muted mb-0">Nível Atual: <strong>@Model.Level</strong></p>
-        </div>
-    </div>
     
-    <div class="mt-3">
-        <label class="form-label">Progresso para o Nível @(Model.Level + 1)</label>
-        
-        <div class="progress" style="height: 25px;">
-            <div class="progress-bar progress-bar-striped bg-success" 
-                 role="progressbar" 
-                 style="width: @percent%" 
-                 aria-valuenow="@Model.ExperiencePoints" 
-                 aria-valuemin="0" 
-                 aria-valuemax="@Model.ExpToNextLevel">
-                @Model.ExperiencePoints / @Model.ExpToNextLevel EXP
-            </div>
-        </div>
-    </div>
-    <div class="mt-4 text-center">
-        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-primary btn-lg">
-            <i class="fas fa-cog me-2"></i>Configurações da Conta
-        </a>
-    </div>
-</div>
+    // XP progredido DENTRO do nível atual (XP Total - XP do nível anterior)
+    int expProgress = Model.ExperiencePoints - expCurrentLevel; 
 
+    // XP total necessário para completar ESTE nível (o tamanho do "range" do nível)
+    int expRange = Model.ExpToNextLevel - expCurrentLevel;
+    
+    // Cálculo da porcentagem (usando o progresso dentro do nível)
+    double percentValue = 0;
+    if (expRange > 0) 
+    {
+        percentValue = ((double)expProgress / expRange) * 100; 
+        if (percentValue > 100) percentValue = 100;
+    }
 
-
-<h2>🏆 Badges Conquistados (@Model.AchievedBadges.Count())</h2>
-
-@if (!Model.AchievedBadges.Any())
-{
-    <div class="alert alert-info">
-        Você ainda não conquistou nenhum badge. Crie receitas e interaja para desbloquear seu primeiro!
-    </div>
+    // Variável 'percent' (double) usada para a lógica dos milestones (percent > 0, percent >= 25)
+    double percent = percentValue; 
+    
+    // Variável 'percentCss' (string) usada no atributo style="width: ..."
+    string percentCss = $"{percent:F0}%"; 
 }
-else
-{
-    <div class="row row-cols-1 row-cols-md-4 g-4">
-        @foreach (var userBadge in Model.AchievedBadges)
+
+<div class="cookbook-wrapper">
+    
+    @* ========== PROFILE HERO SECTION ========== *@
+    <section class="profile-hero">
+        <div class="profile-hero-content">
+            
+            <div class="profile-badge-indicator">
+                <i class="fas fa-trophy"></i>
+                <span>Perfil do Chef</span>
+            </div>
+            
+            <div class="profile-card">
+                <div class="profile-avatar-section">
+                    @{
+        // Verifica se a URL existe E se NÃO é a URL da foto padrão (ajuste o nome do seu default, se for diferente de "default-profile.png")
+        bool hasActualProfilePicture = 
+            !string.IsNullOrEmpty(Model.ProfilePictureUrl) &&
+            !Model.ProfilePictureUrl.Contains("default-profile.png");
+    }
+
+    <div class="profile-avatar">
+        @if (hasActualProfilePicture)
         {
-            <div class="col">
-                <div class="card h-100 text-center shadow-sm border-0">
-                    <div class="card-body">
-                        <i class="@userBadge.Badge!.IconClass fa-4x mb-3" style="color: gold;"></i>
-                        
-                        <h5 class="card-title">@userBadge.Badge.Name</h5>
-                        <p class="card-text text-muted small">@userBadge.Badge.Description</p>
-                        <small class="text-secondary">Conquistado em: @userBadge.DateAchieved.ToString("dd/MM/yyyy")</small>
-                    </div>
-                </div>
+            @* Mostra a foto real *@
+            <img src="@Model.ProfilePictureUrl" 
+                 alt="Foto de Perfil do Chef" 
+                 class="profile-img-style" />
+        }
+        else
+        {
+            @* Mostra a primeira letra do nome como fallback *@
+            <div class="profile-img-style profile-avatar-text-fallback"> @* Use profile-img-style para manter o tamanho e adicione uma classe para o texto *@
+                @Model.UserName?.Substring(0, 1).ToUpper()
             </div>
         }
     </div>
+                    <div class="profile-level-badge">
+                        <span class="level-number">@Model.Level</span>
+                        <span class="level-label">Nível</span>
+                    </div>
+                </div>
+                
+                <div class="profile-info">
+                    <h1 class="profile-name">@Model.UserName</h1>
+                    <p class="profile-subtitle">Chef de Nível @Model.Level</p>
+                    
+                    <div class="profile-xp-container">
+                        <div class="xp-header">
+                            <span class="xp-label">Progresso para o Nível @(Model.Level + 1)</span>
+                            @* Alteração para usar o XP de progresso dentro do nível, se necessário: *@
+                            <span class="xp-count">@expProgress / @expRange XP</span> 
+                            
+                            @* Opção 2: manter o XP total: *@
+                            @* <span class="xp-count">@Model.ExperiencePoints / @Model.ExpToNextLevel XP</span> *@
+                        </div>
+                        
+                        <div class="xp-progress-bar">
+                            @* MUDANÇA: Usar 'percentCss' na largura, pois já é a string formatada "34%" *@
+                            <div class="xp-progress-fill" style="width: @percentCss"> 
+                                <div class="xp-progress-glow"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="xp-milestones">
+                            @* Os Milestones continuam usando 'percent' (double) como estava: *@
+                            <div class="milestone milestone-start">
+                                <div class="milestone-marker @(percent > 0 ? "achieved" : "")"></div>
+                            </div>
+                            <div class="milestone milestone-quarter">
+                                <div class="milestone-marker @(percent >= 25 ? "achieved" : "")"></div>
+                            </div>
+                            <div class="milestone milestone-half">
+                                <div class="milestone-marker @(percent >= 50 ? "achieved" : "")"></div>
+                            </div>
+                            <div class="milestone milestone-threequarter">
+                                <div class="milestone-marker @(percent >= 75 ? "achieved" : "")"></div>
+                            </div>
+                            <div class="milestone milestone-end">
+                                <div class="milestone-marker @(percent >= 100 ? "achieved" : "")"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn-cookbook btn-primary">
+                            <i class="fas fa-cog"></i>
+                            Configurações
+                        </a>
+                        <a asp-controller="Receitas" asp-action="MinhasReceitas" class="btn-cookbook btn-outline">
+                            <i class="fas fa-utensils"></i>
+                            Minhas Receitas
+                        </a>
+                        <a asp-controller="Receitas" asp-action="ReceitasSalvas" class="btn-cookbook btn-outline">
+                            <i class="fas fa-bookmark"></i>
+                            Receitas Salvas
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+    
+    @* ========== BADGES SECTION ========== *@
+    <section class="badges-section">
+        <div class="section-header">
+            <div class="section-title-group">
+                <div class="section-icon">
+                    <i class="fas fa-medal"></i>
+                </div>
+                <div>
+                    <h2 class="section-title">Badges Conquistados</h2>
+                    <p class="section-description">
+                        @if (Model.AchievedBadges.Any())
+                        {
+                            <text>Você conquistou @Model.AchievedBadges.Count() badge@(Model.AchievedBadges.Count() > 1 ? "s" : "") até agora. Continue assim!</text>
+                        }
+                        else
+                        {
+                            <text>Crie receitas e interaja com a comunidade para desbloquear seus primeiros badges.</text>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        @if (!Model.AchievedBadges.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h3 class="empty-state-title">Nenhum Badge Conquistado Ainda</h3>
+                <p class="empty-state-description">
+                    Comece sua jornada criando sua primeira receita ou interagindo com outros chefs para desbloquear conquistas exclusivas.
+                </p>
+                <a asp-controller="Receitas" asp-action="Create" class="btn-cookbook btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Criar Minha Primeira Receita
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="badges-grid">
+                @foreach (var userBadge in Model.AchievedBadges)
+                {
+                    <div class="badge-card">
+                        <div class="badge-card-glow"></div>
+                        <div class="badge-icon-container">
+                            <div class="badge-icon-ring"></div>
+                            <i class="@userBadge.Badge!.IconClass badge-icon"></i>
+                        </div>
+                        <h3 class="badge-name">@userBadge.Badge.Name</h3>
+                        <p class="badge-description">@userBadge.Badge.Description</p>
+                        <div class="badge-date">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>@userBadge.DateAchieved.ToString("dd/MM/yyyy")</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+    
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Observer para animações
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            
+            // Observar badge cards
+            document.querySelectorAll('.badge-card').forEach(function(el) {
+                el.style.animationPlayState = 'paused';
+                observer.observe(el);
+            });
+            
+            // Animação da barra de progresso
+            setTimeout(function() {
+                const progressFill = document.querySelector('.xp-progress-fill');
+                if (progressFill) {
+                    // Isso garante que a animação só ocorre DEPOIS que o JS é executado, dando o efeito de "carregando"
+                    progressFill.style.transition = 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                }
+            }, 300);
+        });
+    </script>
 }
+```

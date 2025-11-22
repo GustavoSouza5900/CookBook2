@@ -1,65 +1,286 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - CookBook</title>
-    <script type="importmap"></script>
+    <title>@(ViewData["Title"] ?? "Página Padrão") - CookBook</title>
+    
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/CookBook.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/cookbook-styles-extended.css">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:wght@400;600;700&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="~/css/cookbook-styles.css">
+    
+
+    
+    @* Renderiza estilos ESPECÍFICOS das Views *@
+    @RenderSection("Styles", required: false)
 </head>
 <body>
+    @{
+        // OBTÉM O USUÁRIO LOGADO E O CAMINHO DA FOTO
+        CookBook.Models.ApplicationUser? currentUser = null;
+        string profileImageUrl = "/images/profiles/default-profile.png"; // Caminho da imagem padrão
+        string? userName = User.Identity?.Name; // Adicionado para o fallback de letra inicial
+        bool hasActualProfilePicture = false; // Inicializado
+
+        if (SignInManager.IsSignedIn(User))
+        {
+            // Carrega o objeto completo do ApplicationUser
+            currentUser = await UserManager.GetUserAsync(User);
+            string? userProfileUrl = currentUser?.ProfilePictureUrl;
+            // Verifica se o usuário existe e se a URL da foto existe (e usa a URL padrão se for nula)
+            if (!string.IsNullOrEmpty(userProfileUrl) && 
+                !userProfileUrl.Contains("/images/profiles/default-profile.png")) // <- Garanta que este caminho está correto
+            {
+                hasActualProfilePicture = true; // DEFINIMOS COMO TRUE
+                profileImageUrl = userProfileUrl; // Armazena a URL da foto REAL
+            }
+            // 2. Se a foto for o padrão ou não existir, hasActualProfilePicture continua false, 
+            //    e profileImageUrl permanece com o valor "/images/profiles/default-profile.png" (o que está ok).
+
+            // 3. Garante que o nome de usuário está atualizado, caso não tenha sido buscado corretamente pelo Identity?.Name
+            if (currentUser != null)
+            {
+                userName = currentUser.UserName;
+            }
+        }
+        
+        // Obtém o nome do Controller e da Action que estão sendo executados
+        var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+    }
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">CookBook</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="Ranking">
-                            <i class="fas fa-trophy"></i> Ranking
-                        </a>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Receitas" asp-action="Index">Receitas</a>
-                        </li>
-                        @if (User.Identity!.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Receitas" asp-action="MinhasReceitas">
-                                    Minhas Receitas
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Receitas" asp-action="ReceitasSalvas">
-                                    Receitas Salvas
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                    <partial name="_LoginPartial" />
+        <nav class="cookbook-navbar" id="navbar">
+            <div class="navbar-container">
+                <a asp-controller="Home" asp-action="Index" class="navbar-brand">
+                    <div class="navbar-logo">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <span class="navbar-title">CookBook</span>
+                </a>
+                
+                <div class="navbar-menu">
+                    @* INÍCIO: Adiciona 'active' se o Controller for Home (Exemplo: /Home/Index) *@
+                    <a asp-controller="Home" asp-action="Index" 
+                    class="nav-link @(currentController == "Home" ? "active" : "")">
+                        <i class="fas fa-home"></i>
+                        Início
+                    </a>
+                    
+                    @* RECEITAS: Adiciona 'active' se o Controller for Receitas *@
+                    <a asp-controller="Receitas" asp-action="Index" 
+                    class="nav-link @(currentController == "Receitas" ? "active" : "")">
+                        <i class="fas fa-book-open"></i>
+                        Receitas
+                    </a>
+                    
+                    @* RANKING: Adiciona 'active' se o Action for Ranking *@
+                    <a asp-controller="Profile" asp-action="Ranking" 
+                    class="nav-link @(currentAction == "Ranking" ? "active" : "")">
+                        <i class="fas fa-trophy"></i>
+                        Ranking
+                    </a>
+                    
+                    @* PERFIL: Adiciona 'active' se o Action for Badges *@
+                    <a asp-controller="Profile" asp-action="Badges" 
+                    class="nav-link @(currentAction == "Badges" ? "active" : "")"> 
+                        <i class="fas fa-user"></i>
+                        Perfil
+                    </a>
                 </div>
+                
+                <div class="navbar-actions">
+                    @* INÍCIO DA MUDANÇA: Exibe a imagem de perfil para o usuário logado *@
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <a asp-controller="Profile" asp-action="Badges" title="Perfil" class="btn-navbar btn-profile">
+                            
+                            @if (hasActualProfilePicture)
+                        {
+                            @* Mostra a foto real *@
+                            <img src="@profileImageUrl" alt="Foto de Perfil" class="profile-thumb" />
+                        }
+                        else
+                        {
+                            @* Mostra a primeira letra do nome como fallback *@
+                            <div class="profile-thumb profile-thumb-text"> @* Adicione a classe 'profile-thumb-text' para estilizar o texto *@
+                                @userName?.Substring(0, 1).ToUpper()
+                            </div>
+                        }
+
+                            @* Exibe o Nome de Usuário *@
+                            @(currentUser?.UserName ?? "Perfil")
+                        </a>
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" class="d-inline">
+                            <button type="submit" class="btn-navbar btn-logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Sair
+                            </button>
+                        </form>
+                    }
+                    @* FIM DA MUDANÇA *@
+                    else
+                    {
+                        <a asp-area="Identity" asp-page="/Account/Login" class="btn-navbar btn-login">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Entrar
+                        </a>
+                        <a asp-area="Identity" asp-page="/Account/Register" class="btn-navbar btn-register">
+                            <i class="fas fa-user-plus"></i>
+                            Cadastrar
+                        </a>
+                    }
+                    
+                    <button class="btn-menu-toggle" id="menuToggle" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars" id="menuIcon"></i>
+                    </button>
+                </div> 
             </div>
         </nav>
     </header>
+        
+        @* Mobile Menu *@
+        <div class="mobile-menu" id="mobileMenu">
+            <a asp-controller="Home" asp-action="Index" class="mobile-nav-link">
+                <i class="fas fa-home"></i>
+                Início
+            </a>
+            <a asp-controller="Receitas" asp-action="Index" class="mobile-nav-link">
+                <i class="fas fa-book-open"></i>
+                Receitas
+            </a>
+            <a asp-controller="Profile" asp-action="Ranking" class="mobile-nav-link">
+                <i class="fas fa-trophy"></i>
+                Ranking
+            </a>
+            <a asp-controller="Profile" asp-action="Badges" class="mobile-nav-link"> <i class="fas fa-user"></i>
+                Perfil
+            </a>
+            @* AÇÕES MOBILE (Login/Cadastro) *@
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" class="mobile-btn-logout">
+                    <button type="submit" class="mobile-btn-register">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Sair
+                    </button>
+                </form>
+            }
+            else
+            {
+                <a asp-area="Identity" asp-page="/Account/Login" class="mobile-btn-register">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Entrar
+                </a>
+                <a asp-area="Identity" asp-page="/Account/Register" class="mobile-btn-register">
+                    <i class="fas fa-user-plus"></i>
+                    Cadastrar
+                </a>
+            }
+        </div>
+        
+        @* Spacer for fixed navbar *@
+        <div class="navbar-spacer"></div>
+    </header>
+    
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
+    
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - CookBook - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="cookbook-footer">
+        <div class="container footer-grid-content">
+            <div class="footer-section footer-brand">
+                <h4>CookBook</h4>
+                <p>Receitas deliciosas e saudáveis para a sua cozinha digital.</p>
+                <p class="copyright-mobile">&copy; 2025 - CookBook</p>
+            </div>
+            <div class="footer-section footer-links">
+                <h5>Descubra</h5>
+                <ul>
+                    <li><a asp-controller="Receitas" asp-action="Categorias">Categorias</a></li>
+                    <li><a asp-controller="Profile" asp-action="Ranking">Ranking Chef</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="Privacy">Política de Privacidade</a></li>
+                </ul>
+            </div>
+            <div class="footer-section footer-social">
+                <h5>Conecte-se</h5>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+                <a asp-controller="Contato" asp-action="Index" class="btn btn-warning mt-3">Fale Conosco</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                &copy; 2025 - CookBook - Todos os direitos reservados.
+            </div>
         </div>
     </footer>
+    
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    @* SCRIPTS DA NAVBAR E MOBILE MENU AGORA ESTÃO NO LAYOUT *@
+    <script>
+        // Toggle Mobile Menu
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuIcon = document.getElementById('menuIcon');
+            
+            mobileMenu.classList.toggle('active');
+            
+            if (mobileMenu.classList.contains('active')) {
+                menuIcon.classList.remove('fa-bars');
+                menuIcon.classList.add('fa-times');
+            } else {
+                menuIcon.classList.remove('fa-times');
+                menuIcon.classList.add('fa-bars');
+            }
+        }
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            if (!mobileMenu.contains(event.target) && !menuToggle.contains(event.target)) {
+                mobileMenu.classList.remove('active');
+                document.getElementById('menuIcon').classList.remove('fa-times');
+                document.getElementById('menuIcon').classList.add('fa-bars');
+            }
+        });
+    </script>
+    
+    @* Renderiza scripts ESPECÍFICOS das Views *@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

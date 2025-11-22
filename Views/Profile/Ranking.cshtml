@@ -2,58 +2,284 @@
 @using System.Security.Claims
 @model IEnumerable<dynamic> 
 @{
-    ViewData["Title"] = "Ranking Global de Chefs";
+    ViewData["Title"] = "Ranking Global de Chefs - CookBook";
+    Layout = "~/Views/Shared/_Layout.cshtml";
     int rank = 0;
     string currentUserId = ViewBag.CurrentUserId as string ?? "";
 }
 
-<h1 class="text-center">🏆 Ranking Global de Chefs</h1>
-<p class="text-center text-muted">Baseado no número total de curtidas recebidas.</p>
-<hr />
+@section Styles {
+    <link rel="stylesheet" href="~/css/cookbook-styles.css">
+}
 
-<div class="table-responsive">
-    <table class="table table-hover table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Nome de Usuário</th>
-                <th scope="col" class="text-center">Nível</th>
-                <th scope="col" class="text-center">Curtidas Recebidas</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var userEntry in Model)
-            {
-                rank++;
-                // 💡 Condição para destacar o usuário logado
-                bool isCurrentUser = userEntry.Id == currentUserId;
-                
-                <tr class="@(isCurrentUser ? "table-primary fw-bold" : "")">
-                    <th scope="row">
-                        @(rank == 1 ? "🥇" : rank == 2 ? "🥈" : rank == 3 ? "🥉" : rank.ToString())
-                    </th>
-                    <td>
-                        @userEntry.UserName
-                        @if (isCurrentUser)
-                        {
-                            <span class="badge bg-primary ms-2">Você</span>
-                        }
-                    </td>
-                    <td class="text-center">
-                        @userEntry.Level
-                    </td>
-                    <td class="text-center">
-                        <i class="fas fa-heart text-danger me-1"></i> @userEntry.TotalLikesReceived
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+<div class="navbar-spacer"></div>
 
-@if (!Model.Any())
-{
-    <div class="alert alert-warning text-center">
-        Nenhum usuário encontrado no ranking. Comece a criar receitas!
+@* ========== RANKING PAGE ========== *@
+<main class="ranking-page">
+    
+    @* Page Header *@
+    <div class="ranking-header">
+        <div class="ranking-badge">
+            <i class="fas fa-trophy"></i>
+            Hall da Fama
+        </div>
+        <h1>
+            <span class="trophy-icon">🏆</span>
+            Ranking Global de Chefs
+        </h1>
+        <p>Os melhores chefs da comunidade baseado no total de curtidas recebidas</p>
     </div>
+    
+    @* Top 3 Podium *@
+    @{
+        var topThree = Model.Take(3).ToList();
+        var restOfRanking = Model.Skip(3).ToList();
+    }
+    
+    @if (topThree.Count >= 3)
+    {
+        <div class="podium-section">
+            @* Second Place *@
+            @if (topThree.Count >= 2)
+            {
+                var second = topThree[1];
+                bool isCurrentUserSecond = second.Id == currentUserId;
+                <div class="podium-card second @(isCurrentUserSecond ? "current-user" : "")">
+                    <div class="podium-rank-badge silver">
+                        <span class="rank-medal">🥈</span>
+                        <span class="rank-number">2º</span>
+                    </div>
+                    <div class="podium-avatar">
+                        @if (!string.IsNullOrEmpty(second.ProfilePictureUrl))
+{
+ <img src="@second.ProfilePictureUrl" 
+alt="Foto de @(second.UserName ?? "Chef Desconhecido")" 
+class="podium-avatar-img" /> 
+}
+else
+{
+ <div class="podium-avatar-text"> 
+ @second.UserName?.Substring(0, 1).ToUpper()
+ </div>
+ }
+                    </div>
+                    <h3 class="podium-username">
+                        @second.UserName
+                        @if (isCurrentUserSecond)
+                        {
+                            <span class="you-badge">Você</span>
+                        }
+                    </h3>
+                    <div class="podium-level">
+                        <i class="fas fa-star"></i>
+                        Nível @second.Level
+                    </div>
+                    <div class="podium-likes">
+                        <i class="fas fa-heart"></i>
+                        <span>@second.TotalLikesReceived curtidas</span>
+                    </div>
+                </div>
+            }
+            
+            @* First Place *@
+            @if (topThree.Count >= 1)
+            {
+                var first = topThree[0];
+                bool isCurrentUserFirst = first.Id == currentUserId;
+                <div class="podium-card first @(isCurrentUserFirst ? "current-user" : "")">
+                    <div class="podium-rank-badge gold">
+                        <span class="rank-medal">🥇</span>
+                        <span class="rank-number">1º</span>
+                    </div>
+                    <div class="crown-icon">👑</div>
+                    <div class="podium-avatar champion">
+                        @if (!string.IsNullOrEmpty(first.ProfilePictureUrl))
+            {
+<img src="@first.ProfilePictureUrl" 
+alt="Foto de @(first.UserName ?? "Chef Desconhecido")" 
+class="podium-avatar-img champion" /> 
+ }
+ else
+ {
+ <div class="podium-avatar-text champion"> 
+ @first.UserName?.Substring(0, 1).ToUpper()
+ </div>
+ }
+                    </div>
+                    <h3 class="podium-username">
+                        @first.UserName
+                        @if (isCurrentUserFirst)
+                        {
+                            <span class="you-badge">Você</span>
+                        }
+                    </h3>
+                    <div class="podium-level">
+                        <i class="fas fa-star"></i>
+                        Nível @first.Level
+                    </div>
+                    <div class="podium-likes">
+                        <i class="fas fa-heart"></i>
+                        <span>@first.TotalLikesReceived curtidas</span>
+                    </div>
+                </div>
+            }
+            
+            @* Third Place *@
+            @if (topThree.Count >= 3)
+            {
+                var third = topThree[2];
+                bool isCurrentUserThird = third.Id == currentUserId;
+                <div class="podium-card third @(isCurrentUserThird ? "current-user" : "")">
+                    <div class="podium-rank-badge bronze">
+                        <span class="rank-medal">🥉</span>
+                        <span class="rank-number">3º</span>
+                    </div>
+                    <div class="podium-avatar">
+                        @if (!string.IsNullOrEmpty(third.ProfilePictureUrl))
+{
+<img src="@third.ProfilePictureUrl" 
+alt="Foto de @(third.UserName ?? "Chef Desconhecido")" 
+class="podium-avatar-img" /> 
+ }
+ else
+ {
+ <div class="podium-avatar-text"> 
+ @third.UserName?.Substring(0, 1).ToUpper()
+ </div>
+}
+                    </div>
+                    <h3 class="podium-username">
+                        @third.UserName
+                        @if (isCurrentUserThird)
+                        {
+                            <span class="you-badge">Você</span>
+                        }
+                    </h3>
+                    <div class="podium-level">
+                        <i class="fas fa-star"></i>
+                        Nível @third.Level
+                    </div>
+                    <div class="podium-likes">
+                        <i class="fas fa-heart"></i>
+                        <span>@third.TotalLikesReceived curtidas</span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    
+    @* Rest of Rankings *@
+    @if (restOfRanking.Any())
+    {
+        <div class="ranking-list-section">
+            <h2 class="ranking-list-title">
+                <i class="fas fa-list-ol"></i>
+                Classificação Geral
+            </h2>
+            
+            <div class="ranking-list">
+                @{
+                    rank = 3; // Começa do 4º lugar
+                }
+                @foreach (var userEntry in restOfRanking)
+                {
+                    rank++;
+                    bool isCurrentUser = userEntry.Id == currentUserId;
+                    
+                    <div class="ranking-item @(isCurrentUser ? "current-user" : "")" style="animation-delay: @((rank - 3) * 0.05)s;">
+                        <div class="ranking-position">
+                            <span class="position-number">@rank</span>
+                        </div>
+                        
+                        <div class="ranking-user-info">
+                            @* **CORREÇÃO: Lista Geral - Foto ou Inicial** *@
+ @{
+                                // Verifica se a URL existe E não é a URL padrão
+ bool hasActualProfilePicture = 
+ !string.IsNullOrEmpty(userEntry.ProfilePictureUrl) &&
+ !userEntry.ProfilePictureUrl.Contains("default-profile.png");
+ }
+
+ @if (hasActualProfilePicture)
+ {
+ <img src="@userEntry.ProfilePictureUrl" 
+alt="Foto de @(userEntry.UserName ?? "Chef Desconhecido")" 
+class="ranking-avatar-img" />
+}
+else
+ {
+<div class="ranking-avatar-text">
+ @userEntry.UserName?.Substring(0, 1).ToUpper()
+</div>
+ }
+@* **FIM DA CORREÇÃO** *@
+
+                            <div class="ranking-user-details">
+                                <h4 class="ranking-username">
+                                    @userEntry.UserName
+                                    @if (isCurrentUser)
+                                    {
+                                        <span class="you-badge-small">Você</span>
+                                    }
+                                </h4>
+                                <div class="ranking-level-badge">
+                                    <i class="fas fa-star"></i>
+                                    Nível @userEntry.Level
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="ranking-stats">
+                            <div class="ranking-likes">
+                                <i class="fas fa-heart"></i>
+                                <span>@userEntry.TotalLikesReceived</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    
+    @if (!Model.Any())
+    {
+        <div class="ranking-empty">
+            <div class="ranking-empty-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h3>Nenhum chef no ranking ainda</h3>
+            <p>Seja o primeiro a criar receitas incríveis e conquistar curtidas!</p>
+            <a asp-controller="Receitas" asp-action="Create" class="btn-cookbook btn-primary">
+                <i class="fas fa-plus"></i>
+                Criar Primeira Receita
+            </a>
+        </div>
+    }
+    
+</main>
+
+@section Scripts {
+    <script>
+        // Animação de entrada ao scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.ranking-item').forEach(function(el) {
+                el.style.animationPlayState = 'paused';
+                observer.observe(el);
+            });
+        });
+    </script>
 }

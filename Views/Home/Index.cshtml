@@ -1,91 +1,217 @@
-﻿@{
-    ViewData["Title"] = "Bem-vindo ao CookBook: Sua Jornada Culinária";
+﻿
+
+@section Styles {
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:wght@400;600;700&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="~/css/cookbook-styles.css">
 }
 
-<div class="text-center p-5 bg-light rounded-3 shadow-sm mb-5">
-    <h1 class="display-3 fw-bold text-success">Bem-vindo(a) à Sua Cozinha Digital!</h1>
-    <p class="lead">
-        O CookBook é mais do que um lugar para compartilhar receitas; é uma comunidade de Chefs. 
-        Suba de nível, ganhe Badges exclusivos e torne-se uma lenda culinária.
-    </p>
-    <hr class="my-4">
-    <a class="btn btn-success btn-lg" asp-controller="Receitas" asp-action="Create" role="button">
-        <i class="fas fa-plus-circle me-2"></i> Publique Sua Primeira Receita Agora!
-    </a>
+<div class="cookbook-wrapper">
+    
+    @* ========== HERO SECTION ========== *@
+    <section class="cookbook-hero">
+        <div class="hero-content">
+            
+            <div class="hero-badge">
+                <i class="fas fa-sparkles"></i>
+                Bem-vindo à sua cozinha digital
+            </div>
+            
+            <h1 class="hero-title">
+                <span class="brand">CookBook</span>
+                <span class="subtitle">Sua Jornada Culinária</span>
+            </h1>
+            
+            <p class="hero-description">
+                Mais do que receitas. Uma comunidade de chefs apaixonados. 
+                Compartilhe, aprenda e suba de nível enquanto cria pratos incríveis.
+            </p>
+            
+            <div class="hero-actions">
+                <a asp-controller="Receitas" asp-action="Create" class="btn-cookbook btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Publicar Receita
+                </a>
+                <a asp-controller="Receitas" asp-action="Index" class="btn-cookbook btn-outline">
+                    <i class="fas fa-book-open"></i>
+                    Explorar Receitas
+                </a>
+            </div>
+            
+        </div>
+    </section>
+    
+    @* ========== CONTENT SECTION ========== *@
+    <section class="cookbook-content">
+        <div class="content-grid">
+            
+            @* ===== XP System Card ===== *@
+            <div class="cookbook-card card-xp">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Sistema de XP</h2>
+                        <p class="card-description">
+                            Cada ação recompensa você com experiência para subir de nível e conquistar badges exclusivos.
+                        </p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="xp-list">
+                        <div class="xp-item">
+                            <div class="xp-action">
+                                <i class="fas fa-utensils"></i>
+                                <span>Publicar uma Nova Receita</span>
+                            </div>
+                            <span class="xp-value">+100 XP</span>
+                        </div>
+                        <div class="xp-item">
+                            <div class="xp-action">
+                                <i class="fas fa-comment-dots"></i>
+                                <span>Fazer um Comentário</span>
+                            </div>
+                            <span class="xp-value">+10 XP</span>
+                        </div>
+                        <div class="xp-item">
+                            <div class="xp-action">
+                                <i class="fas fa-heart"></i>
+                                <span>Receber uma Curtida</span>
+                            </div>
+                            <span class="xp-value">+5 XP</span>
+                        </div>
+                        <div class="xp-item">
+                            <div class="xp-action">
+                                <i class="fas fa-medal"></i>
+                                <span>Conquistar um Novo Badge</span>
+                            </div>
+                            <span class="xp-value">Bônus Variável</span>
+                        </div>
+                    </div>
+                    
+                    <a asp-controller="Profile" asp-action="Ranking" class="btn-cookbook btn-ghost btn-block">
+                        <i class="fas fa-trophy"></i>
+                        Ver Ranking Global
+                    </a>
+                </div>
+            </div>
+            
+            @* ===== Getting Started Card ===== *@
+            <div class="cookbook-card card-start">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <h2 class="card-title">Comece Agora</h2>
+                        <p class="card-description">
+                            Dê os primeiros passos na sua jornada culinária e torne-se uma lenda.
+                        </p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="steps-list">
+                        <div class="step-item">
+                            <div class="step-marker"></div>
+                            <span class="step-text">Registre-se para salvar suas receitas favoritas</span>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-marker"></div>
+                            <span class="step-text">Publique uma receita simples para ganhar seu primeiro Badge</span>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-marker"></div>
+                            <span class="step-text">Explore a lista e deixe sua opinião nos comentários</span>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-marker"></div>
+                            <span class="step-text">Curta as receitas de outros Chefs para incentivá-los</span>
+                        </div>
+                    </div>
+                    
+                    <a asp-area="Identity" asp-page="/Account/Register" class="btn-cookbook btn-accent btn-block">
+                        <i class="fas fa-hat-chef"></i>
+                        Começar Minha Jornada
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+    
+    @* ========== STATS SECTION ========== *@
+    <section class="cookbook-stats">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                @* Receitas (Usando o contador real) *@
+                <div class="stat-value">@Model.TotalReceitas.ToString("N0")</div>
+                <div class="stat-label">Receitas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                @* Chefs (Usando o contador real) *@
+                <div class="stat-value">@Model.TotalChefs.ToString("N0")</div>
+                <div class="stat-label">Chefs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                @* Comentários (Usando o contador real) *@
+                <div class="stat-value">@Model.TotalComentarios.ToString("N0")</div>
+                <div class="stat-label">Comentários</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                @* Curtidas (Usando o contador real) *@
+                <div class="stat-value">@Model.TotalCurtidas.ToString("N0")</div>
+                <div class="stat-label">Curtidas</div>
+            </div>
+        </div>
+    </section>
+    
 </div>
 
-<div class="row mt-5">
-    <div class="col-lg-6 mb-4">
-        <div class="card h-100 shadow-sm border-success">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0"><i class="fas fa-award me-2"></i> Sua Jornada de Chef (EXP)</h4>
-            </div>
-            <div class="card-body">
-                <p class="card-text">
-                    Cada ação na comunidade recompensa você com Pontos de Experiência (EXP), essenciais para subir de Nível e desbloquear novos Badges.
-                </p>
-                <table class="table table-striped table-hover mt-3">
-                    <thead>
-                        <tr>
-                            <th>Ação</th>
-                            <th class="text-end">Recompensa em EXP</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><i class="fas fa-utensils text-primary me-2"></i> Publicar uma Nova Receita</td>
-                            <td class="text-end fw-bold text-success">+100 EXP</td>
-                        </tr>
-                        <tr>
-                            <td><i class="fas fa-comment-dots text-info me-2"></i> Fazer um Comentário</td>
-                            <td class="text-end fw-bold text-success">+10 EXP</td>
-                        </tr>
-                        <tr>
-                            <td><i class="fas fa-heart text-danger me-2"></i> Receber uma Curtida</td>
-                            <td class="text-end fw-bold text-success">+5 EXP</td>
-                        </tr>
-                        <tr>
-                            <td><i class="fas fa-medal text-warning me-2"></i> Conquistar um Novo Badge</td>
-                            <td class="text-end fw-bold text-success">Bônus de EXP (Variável)</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <a asp-controller="Profile" asp-action="Ranking" class="btn btn-outline-success w-100 mt-3">
-                    <i class="fas fa-trophy me-2"></i> Ver o Ranking Global!
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-6 mb-4">
-        <div class="card h-100 shadow-sm border-info">
-            <div class="card-header bg-info text-white">
-                <h4 class="mb-0"><i class="fas fa-clipboard-list me-2"></i> Comece Agora!</h4>
-            </div>
-            <div class="card-body">
-                <p>Aqui estão algumas ideias para começar a sua jornada no CookBook:</p>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <i class="fas fa-pencil-alt text-muted me-2"></i> 
-                        Registre-se para salvar suas receitas favoritas.
-                    </li>
-                    <li class="list-group-item">
-                        <i class="fas fa-lightbulb text-muted me-2"></i> 
-                        Publique uma receita simples para ganhar seu primeiro Badge!
-                    </li>
-                    <li class="list-group-item">
-                        <i class="fas fa-search text-muted me-2"></i> 
-                        Explore a lista de receitas e deixe sua opinião nos comentários.
-                    </li>
-                    <li class="list-group-item">
-                        <i class="fas fa-star text-muted me-2"></i> 
-                        Curta as receitas de outros Chefs para incentivá-los.
-                    </li>
-                </ul>
-                <a asp-controller="Receitas" asp-action="Index" class="btn btn-outline-info w-100 mt-3">
-                    <i class="fas fa-book-open me-2"></i> Explorar Receitas
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+@section Scripts {
+    <script>
+        // Animação de entrada dos elementos ao scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            // Observer para animações ao entrar na viewport
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                        // Parar de observar depois de animar uma vez
+                        observer.unobserve(entry.target); 
+                    }
+                });
+            }, observerOptions);
+            
+            // Observar cards e stats
+            document.querySelectorAll('.cookbook-card, .stat-card').forEach(function(el) {
+                // Inicializa pausado para a animação ser disparada pelo observer
+                el.style.animationPlayState = 'paused'; 
+                observer.observe(el);
+            });
+            
+            // O BLOCO DE CÓDIGO DO HOVER (mouse enter/leave) FOI REMOVIDO DAQUI
+            // POIS DEVE SER CONFIGURADO VIA CSS.
+        });
+    </script>
+
+}

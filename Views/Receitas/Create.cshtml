@@ -1,94 +1,197 @@
 @model CookBook.ViewModels.ReceitaCreateViewModel
 
 @{
-    ViewData["Title"] = "Criar Receita";
+    ViewData["Title"] = "Criar Receita - CookBook";
+    Layout = "_Layout";
 }
-<h1 class="mb-4">Criar Noova Receita</h1>
-<div class="row">
-    <div class="col-lg-10 mx-auto">
-        <form asp-action="Create" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-           <div class="card p-4 shadow-sm mb-4">
-                <h5 class="card-title text-success"><i class="fas fa-utensils me-2"></i> Informações Básicas</h5>
-                
-                <div class="mb-3">
-                    <label asp-for="Titulo" class="form-label"></label>
-                    <input asp-for="Titulo" class="form-control" />
-                    <span asp-validation-for="Titulo" class="text-danger"></span>
-                </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="TempoPreparoMinutos" class="form-label"></label>
-                        <input asp-for="TempoPreparoMinutos" class="form-control" type="number" min="1" />
-                        <span asp-validation-for="TempoPreparoMinutos" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/cookbook-styles.css">
+}
 
-            <div class="card p-4 shadow-sm mb-4">
-                <h5 class="card-title text-warning"><i class="fas fa-list-ol me-2"></i> Instruções / Modo de Preparo</h5>
-                <p class="text-muted small">Escreva os passos detalhadamente, um passo por linha.</p>
+<div class="navbar-spacer"></div>
 
-                <div class="mb-3">
-                    <label asp-for="Instrucoes" class="form-label"></label>
-                    <textarea asp-for="Instrucoes" class="form-control" rows="15"></textarea>
-                    <span asp-validation-for="Instrucoes" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="card p-4 shadow-sm mb-4">
-                <h5 class="card-title text-primary"><i class="fas fa-image me-2"></i> Imagem de Capa</h5>
-                <div class="mb-3">
-                    <label asp-for="ImagemArquivo" class="form-label">Adicionar Imagem</label>
-                    <input asp-for="ImagemArquivo" type="file" class="form-control" accept="image/*" />
-                </div>
-            </div>
-            
-            <div class="card p-4 shadow-sm mb-4">
-                <h5 class="card-title text-info"><i class="fas fa-list-ul me-2"></i> Ingredientes</h5>
-                <p class="text-muted small">Use a tabela para gerenciar os ingredientes desta receita.</p>
-                
-                <div class="row mb-3">
-                    <div class="col-md-5">
-                        <label for="IngredienteNome" class="form-label">Nome do Ingrediente</label>
-                        <input type="text" id="IngredienteNome" class="form-control" list="listaIngredientes" placeholder="Ex: Farinha de Trigo">
-                        
-                        <datalist id="listaIngredientes">
-                            @foreach(var item in ViewBag.IngredientesDisponiveis as List<CookBook.Models.Ingrediente> ?? new List<CookBook.Models.Ingrediente>())
-                            {
-                                <option value="@item.Nome"></option>
-                            }
-                        </datalist>
-                    </div>
-                    <div class="col-md-5">
-                        <label for="IngredienteQuantidade" class="form-label">Quantidade</label>
-                        <input type="text" id="IngredienteQuantidade" class="form-control" placeholder="Ex: 2 xícaras">
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="button" class="btn btn-secondary w-100" onclick="adicionarIngrediente()">Adicionar</button>
-                    </div>
-                </div>
-
-                <table id="tabelaIngredientes" class="table table-striped table-bordered">
-                    <thead>
-                        <tr><th>Ingrediente</th><th>Quantidade</th><th style="width: 50px;">Ação</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-
-                <input type="hidden" asp-for="IngredientesInputData" id="ingredientesInputData" />
-                <span asp-validation-for="IngredientesInputData" class="text-danger"></span>
-            </div>
-            
-            <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-5">
-                <input type="submit" value="Salvar Alterações" class="btn btn-primary btn-lg shadow-sm" />
-                <a asp-action="Index" class="btn btn-outline-secondary btn-lg">Voltar à Lista</a>
-            </div>
-        </form>
+@* ========== CREATE RECIPE PAGE ========== *@
+<main class="recipes-page">
+    
+    @* Page Header *@
+    <div class="recipes-header">
+        <h1><i class="fas fa-plus-circle"></i> Criar Nova Receita</h1>
+        <p>Compartilhe sua receita especial com a comunidade CookBook</p>
     </div>
+    
+    <form asp-action="Create" enctype="multipart/form-data" class="create-recipe-form">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        
+        @* Informações Básicas *@
+        <div class="form-section">
+            <div class="form-section-header">
+                <div class="section-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <div class="section-title">
+                    <h2>Informações Básicas</h2>
+                    <p>Dados principais da sua receita</p>
+                </div>
+            </div>
+            
+            <div class="form-section-body">
+                <div class="form-group">
+                    <label asp-for="Titulo" class="form-label">
+                        <i class="fas fa-pen"></i> Título da Receita
+                    </label>
+                    <input asp-for="Titulo" class="form-input" placeholder="Ex: Bolo de Chocolate Cremoso" />
+                    <span asp-validation-for="Titulo" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="TempoPreparoMinutos" class="form-label">
+                        <i class="fas fa-clock"></i> Tempo de Preparo (minutos)
+                    </label>
+                    <input asp-for="TempoPreparoMinutos" class="form-input" type="number" min="1" placeholder="Ex: 45" />
+                    <span asp-validation-for="TempoPreparoMinutos" class="form-error"></span>
+                </div>
+            </div>
+        </div>
+
+        @* Imagem de Capa *@
+        <div class="form-section">
+            <div class="form-section-header">
+                <div class="section-icon section-icon-primary">
+                    <i class="fas fa-image"></i>
+                </div>
+                <div class="section-title">
+                    <h2>Imagem de Capa</h2>
+                    <p>Adicione uma foto apetitosa da sua receita</p>
+                </div>
+            </div>
+            
+            <div class="form-section-body">
+                <div class="form-group">
+                    <label asp-for="ImagemArquivo" class="form-label">
+                        <i class="fas fa-upload"></i> Selecionar Imagem
+                    </label>
+                    <input asp-for="ImagemArquivo" type="file" class="form-input-file" accept="image/*" />
+                    <div class="form-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Formatos aceitos: JPG, PNG, GIF (máx. 5MB)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* Ingredientes *@
+<div class="form-section">
+    <div class="form-section-header">
+        <div class="section-icon section-icon-info">
+            <i class="fas fa-list-ul"></i>
+        </div>
+        <div class="section-title">
+            <h2>Ingredientes</h2>
+            <p>Liste todos os ingredientes necessários</p>
+        </div>
+    </div>
+    
+    <div class="form-section-body">
+        <div class="ingredients-input-wrapper">
+            <div class="ingredient-input-group">
+                <div class="form-group flex-grow">
+                    <label for="IngredienteNome" class="form-label">Nome do Ingrediente</label>
+                    <input type="text" id="IngredienteNome" class="form-input" list="listaIngredientes" placeholder="Ex: Farinha de Trigo">
+                    
+                    <datalist id="listaIngredientes">
+                        @foreach(var item in ViewBag.IngredientesDisponiveis as List<CookBook.Models.Ingrediente> ?? new List<CookBook.Models.Ingrediente>())
+                        {
+                            <option value="@item.Nome"></option>
+                        }
+                    </datalist>
+                </div>
+                
+                <div class="form-group flex-grow">
+                    <label for="IngredienteQuantidade" class="form-label">Quantidade</label>
+                    <input type="text" id="IngredienteQuantidade" class="form-input" placeholder="Ex: 2 xícaras">
+                </div>
+                
+                <div class="form-group-action">
+                    <button type="button" class="btn-add-ingredient" onclick="adicionarIngrediente()">
+                        <i class="fas fa-plus"></i>
+                        <span>Adicionar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ingredients-table-wrapper">
+            <table id="tabelaIngredientes" class="ingredients-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-carrot"></i> Ingrediente</th>
+                        <th><i class="fas fa-balance-scale"></i> Quantidade</th>
+                        <th class="action-column">Ação</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            
+            <div id="emptyIngredientsState" class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-shopping-basket"></i>
+                </div>
+                <p>Nenhum ingrediente adicionado ainda</p>
+            </div>
+        </div>
+
+        <input 
+            asp-for="IngredientesInputData" 
+            id="ingredientesInputData" 
+            type="text" 
+            style="height: 0; padding: 0; border: none; opacity: 0; position: absolute; top: 0;"
+        />
+        <span asp-validation-for="IngredientesInputData" class="form-error"></span>
+        </div>
 </div>
 
+        @* Instruções *@
+        <div class="form-section">
+            <div class="form-section-header">
+                <div class="section-icon section-icon-warning">
+                    <i class="fas fa-list-ol"></i>
+                </div>
+                <div class="section-title">
+                    <h2>Modo de Preparo</h2>
+                    <p>Descreva os passos detalhadamente</p>
+                </div>
+            </div>
+            
+            <div class="form-section-body">
+                <div class="form-group">
+                    <label asp-for="Instrucoes" class="form-label">
+                        <i class="fas fa-tasks"></i> Instruções
+                    </label>
+                    <textarea asp-for="Instrucoes" class="form-textarea" rows="15" placeholder="1. Pré-aqueça o forno a 180°C&#10;2. Em uma tigela, misture...&#10;3. Adicione os ingredientes secos..."></textarea>
+                    <span asp-validation-for="Instrucoes" class="form-error"></span>
+                    <div class="form-hint">
+                        <i class="fas fa-lightbulb"></i>
+                        Dica: Escreva cada passo em uma linha separada para melhor organização
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        @* Action Buttons *@
+        <div class="form-actions">
+            <button type="submit" class="btn-form-submit">
+                <i class="fas fa-check"></i>
+                Publicar Receita
+            </button>
+            <a asp-action="Index" class="btn-form-cancel">
+                <i class="fas fa-arrow-left"></i>
+                Cancelar
+            </a>
+        </div>
+    </form>
+    
+</main>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
@@ -96,6 +199,7 @@
         let ingredientesAdicionados = [];
         const inputData = document.getElementById('ingredientesInputData');
         const tabela = document.getElementById('tabelaIngredientes').getElementsByTagName('tbody')[0];
+        const emptyState = document.getElementById('emptyIngredientsState');
 
         function adicionarIngrediente() {
             const nomeInput = document.getElementById('IngredienteNome');
@@ -114,6 +218,7 @@
 
             nomeInput.value = '';
             qtdInput.value = '';
+            nomeInput.focus();
         }
 
         function removerIngrediente(index) {
@@ -125,30 +230,56 @@
             tabela.innerHTML = '';
             let dataString = '';
 
+            if (ingredientesAdicionados.length === 0) {
+                emptyState.style.display = 'flex';
+            } else {
+                emptyState.style.display = 'none';
+            }
+
             ingredientesAdicionados.forEach((item, index) => {
-                // Cria a linha na tabela para exibição
                 const row = tabela.insertRow();
-                row.insertCell().textContent = item.nome;
-                row.insertCell().textContent = item.quantidade;
+                row.className = 'ingredient-row';
+                
+                const nomeCell = row.insertCell();
+                nomeCell.textContent = item.nome;
+                nomeCell.className = 'ingredient-name';
+                
+                const qtdCell = row.insertCell();
+                qtdCell.textContent = item.quantidade;
+                qtdCell.className = 'ingredient-quantity';
                 
                 const acaoCell = row.insertCell();
+                acaoCell.className = 'ingredient-action';
                 const btnRemover = document.createElement('button');
-                btnRemover.textContent = 'Remover';
-                btnRemover.className = 'btn btn-danger btn-sm';
+                btnRemover.innerHTML = '<i class="fas fa-trash"></i>';
+                btnRemover.className = 'btn-remove-ingredient';
                 btnRemover.type = 'button';
                 btnRemover.onclick = () => removerIngrediente(index);
+                btnRemover.title = 'Remover ingrediente';
                 acaoCell.appendChild(btnRemover);
 
-                // Atualiza a string formatada para o Controller (Nome|Quantidade;)
                 dataString += `${item.nome}|${item.quantidade};`;
             });
 
-            // Atualiza o campo oculto que o Controller irá ler
             inputData.value = dataString; 
         }
 
-        // Se houver dados de validação de erro, carregamos eles (opcional, mas bom para UX)
-        // Se a validação falhar no POST, os dados virão no Model.IngredientesInputData
+        // Permitir adicionar ingrediente com Enter
+        document.getElementById('IngredienteQuantidade').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                adicionarIngrediente();
+            }
+        });
+
+        document.getElementById('IngredienteNome').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('IngredienteQuantidade').focus();
+            }
+        });
+
+        // Carregar dados existentes
         document.addEventListener('DOMContentLoaded', () => {
             const initialData = inputData.value;
             if (initialData) {
@@ -158,6 +289,8 @@
                     ingredientesAdicionados.push({ nome, quantidade });
                 });
                 renderizarTabela();
+            } else {
+                emptyState.style.display = 'flex';
             }
         });
     </script>

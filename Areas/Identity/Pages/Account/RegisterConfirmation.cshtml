@@ -1,0 +1,63 @@
+﻿@page
+@model RegisterConfirmationModel
+@{
+    ViewData["Title"] = "Confirmação de Registro - CookBook";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cookbook-styles.css">
+}
+
+<div class="navbar-spacer"></div>
+
+<main class="auth-page">
+    <div class="auth-container" style="max-width: 600px;">
+        
+        <div class="auth-card" style="text-align: center;">
+            <div class="auth-header">
+                <div class="auth-logo" style="background: linear-gradient(135deg, #6B8E6B 0%, #5a7a5a 100%); box-shadow: 0 8px 24px rgba(107, 142, 107, 0.35);">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <h1 class="auth-title">Cadastro Realizado!</h1>
+                <p class="auth-subtitle">Só falta mais um passo para começar</p>
+            </div>
+
+            <div style="padding: 24px 0;">
+                @if (Model.DisplayConfirmAccountLink)
+                {
+                    <div style="background: linear-gradient(135deg, rgba(224, 122, 61, 0.1) 0%, rgba(107, 142, 107, 0.1) 100%); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px;">
+                        <i class="fas fa-tools" style="font-size: 48px; color: var(--primary); margin-bottom: 16px; display: block;"></i>
+                        <p style="color: var(--foreground-muted); margin-bottom: 16px; font-size: 14px;">
+                            ⚠️ Este app ainda não possui um serviço de email configurado.
+                        </p>
+                        <a id="confirm-link" href="@Model.EmailConfirmationUrl" class="btn-cookbook btn-primary btn-block">
+                            <i class="fas fa-check-circle"></i>
+                            Clique aqui para confirmar sua conta
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div style="background: linear-gradient(135deg, rgba(107, 142, 107, 0.1) 0%, rgba(224, 122, 61, 0.1) 100%); border-radius: var(--radius-lg); padding: 32px;">
+                        <i class="fas fa-paper-plane" style="font-size: 64px; color: var(--accent); margin-bottom: 20px; display: block;"></i>
+                        <h2 style="font-size: 1.25rem; margin-bottom: 12px; color: var(--foreground);">Verifique seu email 📬</h2>
+                        <p style="color: var(--foreground-muted); font-size: 15px;">
+                            Enviamos um link de confirmação para o seu email.<br>
+                            Clique no link para ativar sua conta.
+                        </p>
+                    </div>
+                }
+            </div>
+
+            <div class="auth-footer" style="border-top: none; padding-top: 0;">
+                <p class="auth-footer-text">
+                    <a asp-page="/Account/Login" class="link-primary">
+                        <i class="fas fa-arrow-left"></i>
+                        Voltar para o Login
+                    </a>
+                </p>
+            </div>
+        </div>
+        
+    </div>
+</main>

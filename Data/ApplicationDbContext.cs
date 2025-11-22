@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore; // ESSENCIAL para DbContext
 using CookBook.Models;
 
 namespace CookBook.Data;
@@ -10,7 +10,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         : base(options)
     {
     }
-
+    public DbSet<Receita> Receitas { get; set; } // <--- Corrigindo o erro!
     public DbSet<Receita> Receita { get; set; }
     public DbSet<Ingrediente> Ingrediente { get; set; }
     public DbSet<Comentario> Comentario { get; set; }

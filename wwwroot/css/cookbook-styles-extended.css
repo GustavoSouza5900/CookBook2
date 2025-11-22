@@ -1,0 +1,1009 @@
+/* ========== RANKING PAGE ========== */
+.ranking-page {
+  padding: 60px 24px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.ranking-header {
+  text-align: center;
+  margin-bottom: 60px;
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.ranking-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--warning);
+  background: linear-gradient(135deg, rgba(212, 168, 67, 0.1) 0%, rgba(212, 168, 67, 0.05) 100%);
+  border: 1px solid rgba(212, 168, 67, 0.2);
+  border-radius: 100px;
+  margin-bottom: 20px;
+}
+
+.ranking-badge i {
+  font-size: 12px;
+}
+
+.ranking-header h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: 16px;
+  color: var(--foreground);
+}
+
+.trophy-icon {
+  display: inline-block;
+  font-size: 1.2em;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.ranking-header p {
+  font-size: 1.1rem;
+  color: var(--foreground-muted);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Podium Section */
+.podium-section {
+  
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 24px;
+  margin-bottom: 60px;
+  animation: fadeInUp 0.6s ease 0.2s forwards;
+  opacity: 0;
+  width: 100%;
+
+}
+
+@media (min-width: 768px) {
+  .podium-section {
+    display: flex; 
+        /* Centraliza todos os cartões (o conjunto 2, 1, 3) no centro da tela */
+        justify-content: center; 
+        /* Alinha os itens pela base (mantém o visual do pódio) */
+        align-items: flex-end; 
+        /* Mantém o espaçamento entre os cartões (se você tinha gap definido antes) */
+        gap: 24px;
+  }
+  
+  .podium-section .podium-card.first {
+    order: 2;
+    transform: scale(1.08);
+    transform-origin: center bottom; /* ADICIONE - impede deslocamento lateral */
+
+  }
+  
+  .podium-section .podium-card.second {
+    order: 1;
+  }
+  
+  .podium-section .podium-card.third {
+    order: 3;
+  }
+}
+
+.podium-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-light);
+  box-shadow: var(--shadow-soft);
+  transition: all var(--transition-normal);
+  width: 100%;
+}
+
+.podium-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: var(--shadow-medium);
+}
+
+.podium-card.current-user {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(224, 122, 61, 0.03) 0%, var(--card-bg) 100%);
+  box-shadow: 0 4px 20px rgba(224, 122, 61, 0.2);
+}
+
+.podium-card.first {
+  border-color: rgba(255, 215, 0, 0.4);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, var(--card-bg) 100%);
+}
+
+.podium-card.second {
+  border-color: rgba(192, 192, 192, 0.4);
+}
+
+.podium-card.third {
+  border-color: rgba(205, 127, 50, 0.4);
+}
+
+.podium-rank-badge {
+  position: absolute;
+  top: -16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 100px;
+  box-shadow: var(--shadow-medium);
+}
+
+.podium-rank-badge.gold {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #8b6914;
+}
+
+.podium-rank-badge.silver {
+  background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+  color: #5a5a5a;
+}
+
+.podium-rank-badge.bronze {
+  background: linear-gradient(135deg, #cd7f32 0%, #e9a76a 100%);
+  color: #6b3e1a;
+}
+
+.rank-medal {
+  font-size: 18px;
+}
+
+.crown-icon {
+  position: absolute;
+  top: -30px;
+  font-size: 36px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.podium-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin: 20px auto 16px auto; /* Usar 'auto' nas laterais para forçar a centralização horizontal */
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(224, 122, 61, 0.35);
+  object-fit: cover; /* Garante que a imagem preencha sem distorcer, cortando as bordas */
+}
+
+.podium-avatar.champion {
+  width: 96px;
+  height: 96px;
+  font-size: 40px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #8b6914;
+  box-shadow: 0 6px 24px rgba(255, 215, 0, 0.5);
+  object-fit: cover; /* Garante que a imagem preencha sem distorcer, cortando as bordas */
+}
+
+.podium-username {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+  color: var(--foreground);
+  text-align: center;
+}
+
+.you-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-radius: 100px;
+  vertical-align: middle;
+}
+
+.podium-level {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--warning);
+  background: rgba(212, 168, 67, 0.1);
+  border: 1px solid rgba(212, 168, 67, 0.2);
+  border-radius: 100px;
+}
+
+.podium-level i {
+  font-size: 12px;
+}
+
+.podium-likes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.podium-likes i {
+  font-size: 18px;
+}
+
+/* Ranking List */
+.ranking-list-section {
+  animation: fadeInUp 0.6s ease 0.4s forwards;
+  opacity: 0;
+}
+
+.ranking-list-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.75rem;
+  margin-bottom: 28px;
+  color: var(--foreground);
+}
+
+.ranking-list-title i {
+  color: var(--primary);
+}
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 24px;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-soft);
+  transition: all var(--transition-normal);
+  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+.ranking-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.ranking-item.current-user {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(224, 122, 61, 0.03) 0%, var(--card-bg) 100%);
+  box-shadow: 0 4px 16px rgba(224, 122, 61, 0.15);
+}
+
+.ranking-position {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: var(--background-alt);
+  border-radius: var(--radius-md);
+}
+
+.position-number {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.ranking-user-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.ranking-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ranking-user-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.ranking-username {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.you-badge-small {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-radius: 100px;
+  vertical-align: middle;
+}
+
+.ranking-level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--warning);
+}
+
+.ranking-level-badge i {
+  font-size: 11px;
+}
+
+.ranking-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.ranking-likes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.ranking-likes i {
+  font-size: 18px;
+}
+
+/* Empty State */
+.ranking-empty {
+  text-align: center;
+  padding: 80px 24px;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--border);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.ranking-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, rgba(224, 122, 61, 0.1) 0%, rgba(224, 122, 61, 0.05) 100%);
+  border-radius: 50%;
+  color: var(--primary);
+}
+
+.ranking-empty-icon i {
+  font-size: 44px;
+}
+
+.ranking-empty h3 {
+  font-size: 1.75rem;
+  margin-bottom: 12px;
+  color: var(--foreground);
+}
+
+.ranking-empty p {
+  font-size: 1.05rem;
+  color: var(--foreground-muted);
+  max-width: 500px;
+  margin: 0 auto 28px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .create-recipe-page,
+  .ranking-page {
+    padding: 24px 16px 60px;
+    
+  }
+  
+  .page-header h1,
+  .ranking-header h1 {
+    font-size: 2rem;
+  }
+  
+  .section-header {
+    padding: 20px;
+  }
+  
+  .section-body {
+    padding: 20px;
+  }
+  
+  .ingredients-input-group {
+    flex-direction: column;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn-cookbook {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .ranking-item {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .ranking-stats {
+    width: 100%;
+    justify-content: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-light);
+  }
+}
+
+/* ========================================
+   DELETE PAGE - Página de Exclusão
+   ======================================== */
+
+.delete-page {
+  padding: 60px 24px 80px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.delete-container {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Header de Aviso */
+.delete-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.delete-icon-warning {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, rgba(217, 83, 79, 0.15) 0%, rgba(217, 83, 79, 0.05) 100%);
+  border-radius: 50%;
+  color: var(--danger);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.delete-icon-warning i {
+  font-size: 36px;
+}
+
+.delete-header h1 {
+  font-size: 2.25rem;
+  margin-bottom: 12px;
+  color: var(--foreground);
+}
+
+.delete-warning {
+  font-size: 1.1rem;
+  color: var(--danger);
+  font-weight: 500;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Card da Receita */
+.delete-recipe-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  border: 2px solid rgba(217, 83, 79, 0.2);
+  box-shadow: var(--shadow-medium);
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+
+.delete-recipe-image {
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+  position: relative;
+}
+
+.delete-recipe-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.3) 100%);
+  pointer-events: none;
+}
+
+.delete-recipe-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.delete-recipe-info {
+  padding: 32px;
+}
+
+.delete-recipe-title {
+  font-size: 1.75rem;
+  margin-bottom: 24px;
+  color: var(--foreground);
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+}
+
+.delete-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.delete-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.delete-info-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.delete-info-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--foreground-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.delete-info-label i {
+  color: var(--primary);
+  font-size: 16px;
+}
+
+.delete-info-value {
+  font-size: 16px;
+  color: var(--foreground);
+  line-height: 1.6;
+}
+
+.instructions-preview {
+  background: var(--background-alt);
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  max-height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  font-size: 15px;
+}
+
+/* Ações */
+.delete-actions {
+  margin-top: 40px;
+}
+
+.delete-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-danger-custom {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, var(--danger) 0%, #b84644 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(217, 83, 79, 0.35);
+  transition: all var(--transition-normal);
+}
+
+.btn-danger-custom:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(217, 83, 79, 0.45);
+}
+
+.btn-danger-custom i {
+  font-size: 18px;
+}
+
+/* ========================================
+   CREATE/EDIT - Ajustes Adicionais
+   ======================================== */
+
+.create-recipe-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.create-recipe-header {
+  text-align: center;
+  margin-bottom: 40px;
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.create-recipe-header .header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, rgba(224, 122, 61, 0.15) 0%, rgba(224, 122, 61, 0.05) 100%);
+  border-radius: var(--radius-lg);
+  color: var(--primary);
+}
+
+.create-recipe-header .header-icon i {
+  font-size: 32px;
+}
+
+.create-recipe-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.create-recipe-header p {
+  font-size: 1.1rem;
+  color: var(--foreground-muted);
+}
+
+.create-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  margin-bottom: 28px;
+  animation: fadeInUp 0.6s ease forwards;
+  opacity: 0;
+}
+
+.create-card:nth-child(2) { animation-delay: 0.1s; }
+.create-card:nth-child(3) { animation-delay: 0.2s; }
+.create-card:nth-child(4) { animation-delay: 0.3s; }
+.create-card:nth-child(5) { animation-delay: 0.4s; }
+
+.create-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, var(--background-alt) 0%, var(--background) 100%);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.create-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.create-card-icon i {
+  font-size: 22px;
+}
+
+.create-card-icon.icon-primary {
+  background: linear-gradient(135deg, rgba(224, 122, 61, 0.15) 0%, rgba(224, 122, 61, 0.05) 100%);
+  color: var(--primary);
+}
+
+.create-card-icon.icon-accent {
+  background: linear-gradient(135deg, rgba(107, 142, 107, 0.15) 0%, rgba(107, 142, 107, 0.05) 100%);
+  color: var(--accent);
+}
+
+.create-card-icon.icon-success {
+  background: linear-gradient(135deg, rgba(90, 154, 90, 0.15) 0%, rgba(90, 154, 90, 0.05) 100%);
+  color: var(--success);
+}
+
+.create-card-icon.icon-warning {
+  background: linear-gradient(135deg, rgba(212, 168, 67, 0.15) 0%, rgba(212, 168, 67, 0.05) 100%);
+  color: var(--warning);
+}
+
+.create-card-title-group {
+  flex: 1;
+}
+
+.create-card-title {
+  font-size: 1.35rem;
+  margin-bottom: 4px;
+  color: var(--foreground);
+}
+
+.create-card-description {
+  font-size: 14px;
+  color: var(--foreground-light);
+  margin: 0;
+}
+
+.create-card-body {
+  padding: 28px;
+}
+
+.ingredient-input-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: end;
+}
+
+.ingredient-name,
+.ingredient-quantity {
+  min-width: 0;
+}
+
+.btn-add-ingredient {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(107, 142, 107, 0.25);
+}
+
+.btn-add-ingredient:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(107, 142, 107, 0.35);
+}
+
+.btn-add-ingredient i {
+  font-size: 16px;
+}
+
+.ingredients-empty {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  background: var(--background-alt);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+  margin-top: 20px;
+}
+
+.ingredients-empty i {
+  font-size: 36px;
+  color: var(--primary);
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.ingredients-empty p {
+  font-size: 14px;
+  color: var(--foreground-muted);
+  margin: 0;
+}
+
+.ingredients-table {
+  margin-top: 20px;
+}
+
+.ingredients-table thead th.action-col {
+  width: 60px;
+  text-align: center;
+}
+
+.ingredients-table tbody td:last-child {
+  text-align: center;
+}
+
+.current-image-preview {
+  margin-bottom: 24px;
+}
+
+.current-image-preview img {
+  max-width: 400px;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  margin-top: 12px;
+}
+
+.create-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 40px;
+  animation: fadeInUp 0.6s ease 0.5s forwards;
+  opacity: 0;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .delete-page {
+    padding: 40px 16px 60px;
+  }
+  
+  .delete-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .delete-recipe-info {
+    padding: 24px;
+  }
+  
+  .delete-recipe-title {
+    font-size: 1.5rem;
+  }
+  
+  .delete-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .delete-buttons {
+    flex-direction: column-reverse;
+  }
+  
+  .delete-buttons .btn-cookbook {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .create-recipe-header h1 {
+    font-size: 2rem;
+  }
+  
+  .create-card-header {
+    padding: 20px;
+  }
+  
+  .create-card-body {
+    padding: 20px;
+  }
+  
+  .ingredient-input-group {
+    grid-template-columns: 1fr;
+  }
+  
+  .btn-add-ingredient {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .current-image-preview img {
+    max-width: 100%;
+  }
+  
+  .create-actions {
+    flex-direction: column;
+  }
+  
+  .create-actions .btn-cookbook {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .create-recipe-page,
+  .ranking-page {
+    padding: 24px 16px 60px;
+  }
+  
+  .page-header h1,
+  .ranking-header h1 {
+    font-size: 2rem;
+  }
+  
+  .section-header {
+    padding: 20px;
+  }
+  
+  .section-body {
+    padding: 20px;
+  }
+  
+  .ingredients-input-group {
+    flex-direction: column;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn-cookbook {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .ranking-item {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .ranking-stats {
+    width: 100%;
+    justify-content: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-light);
+  }
+}
+
+.podium-avatar-img {
+    width: 100% !important; /* Mantenha essa regra como fallback forte */
+    height: 100% !important;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.ranking-page {
+    /* Define a largura máxima para o layout principal da página */
+    max-width: 1100px; 
+    /* Centraliza o container principal na tela */
+    margin: 0 auto;    
+    padding: 0 20px;   
+}

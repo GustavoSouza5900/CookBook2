@@ -9,5 +9,8 @@ namespace CookBook.Models
         public ApplicationUser? User { get; set; }
         
         public DateTime DateAchieved { get; set; } = DateTime.Now;
+
+        public string? ProfilePictureUrl { get; set; }
+
     }
 }

@@ -9,5 +9,8 @@ namespace CookBook.Models
         
         public int TotalLikesReceived { get; set; } = 0;
         public int TotalSavedRecipes { get; set; } = 0;
+
+        public string? ProfilePictureUrl { get; set; }
+
     }
 }

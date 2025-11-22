@@ -5,131 +5,345 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-
 @{
     ViewData["Title"] = Model.Receita.Titulo;
+    Layout = "_Layout";
     string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
     bool isAuthor = currentUserId != null && currentUserId == Model.Receita.UserId;
 }
 
-<h1>@Model.Receita.Titulo</h1>
-<hr />
+@section Styles {
+    <link rel="stylesheet" href="~/css/cookbook-styles.css">
+    <link rel="stylesheet" href="~/css/cookbook-recipe-details.css">
+}
 
-<div class="row">
-    <div class="col-md-6">
-        <img src="@Model.Receita.ImagemUrl" alt="Imagem da Receita" class="img-fluid rounded" />
-        <p class="mt-2">Tempo de Preparo: @Model.Receita.TempoPreparoMinutos minutos</p>
-        <p>Criador: @Model.Receita.User?.UserName</p>
-        <p class="mt-2"><small class="text-muted">Criado em: @Model.Receita.DataCriacao.ToString("dd/MM/yyyy")</small></p>
-
-        <div class="d-flex align-items-center mb-3">
-            @if (User.Identity!.IsAuthenticated)
-            {
-                <button id="likeButton" 
-                        data-receita-id="@Model.ReceitaId"
-                        class="btn @(Model.IsLikedByCurrentUser ? "btn-danger" : "btn-outline-danger") me-2"
-                        type="button">
-                    <i class="fas fa-heart"></i>
-                </button>
-                <button id="saveButton" 
-                        data-receita-id="@Model.ReceitaId"
-                        class="btn @(Model.IsSavedByCurrentUser ? "btn-success" : "btn-outline-success") me-2"
-                        type="button">
-                    <i class="fas fa-bookmark"></i>
-                </button>
-            }
-            
-            <span id="likeCountDisplay" class="fs-5">@Model.TotalCurtidas</span>
-            <span class="ms-1 text-muted">Curtidas</span>
-        </div>
-        <h3>Instruções</h3>
-        <p style="white-space: pre-wrap;">@Model.Receita.Instrucoes</p>
+<div class="cookbook-wrapper">
+    
+    @* Mobile Menu *@
+    <div class="mobile-menu" id="mobileMenu">
+        <a asp-controller="Home" asp-action="Index" class="mobile-nav-link">
+            <i class="fas fa-home"></i>
+            Início
+        </a>
+        <a asp-controller="Receitas" asp-action="Index" class="mobile-nav-link">
+            <i class="fas fa-book-open"></i>
+            Receitas
+        </a>
+        <a asp-controller="Profile" asp-action="Ranking" class="mobile-nav-link">
+            <i class="fas fa-trophy"></i>
+            Ranking
+        </a>
+        <a asp-controller="Profile" asp-action="Index" class="mobile-nav-link">
+            <i class="fas fa-user"></i>
+            Perfil
+        </a>
+        <a asp-controller="Account" asp-action="Register" class="mobile-btn-register">
+            <i class="fas fa-user-plus"></i>
+            Cadastrar
+        </a>
     </div>
     
-    <div class="col-md-6">
-        <h3>Ingredientes</h3>
-        <ul>
-            @foreach (var ri in Model.Receita.ReceitaIngredientes!)
-            {
-                <li>@ri.Quantidade de @ri.Ingrediente.Nome</li>
-            }
-        </ul>
-    </div>
-
-    @if (isAuthor)
-        {
-            <div class="mt-5 p-3 bg-light rounded shadow-sm border border-warning d-flex justify-content-start">
-                <a asp-action="Edit" asp-route-id="@Model.ReceitaId" class="btn btn-warning me-2">
-                    <i class="fas fa-edit me-1"></i> Editar Receita
-                </a>
-                <a asp-action="Delete" asp-route-id="@Model.ReceitaId" class="btn btn-danger">
-                    <i class="fas fa-trash-alt me-1"></i> Excluir Receita
-                </a>
+    <div class="navbar-spacer"></div>
+    
+    @* ========== RECIPE DETAILS PAGE ========== *@
+    <main class="recipe-details-page">
+        
+        @* Back Button *@
+        <div class="back-navigation">
+            <a asp-action="Index" class="btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Voltar para Receitas
+            </a>
+        </div>
+        
+        @* Recipe Hero Section *@
+        <div class="recipe-hero">
+            <div class="recipe-hero-image">
+                <img src="@Model.Receita.ImagemUrl" alt="@Model.Receita.Titulo" />
             </div>
-        }
-</div>
+            
+            <div class="recipe-hero-content">
+                <h1 class="recipe-title">@Model.Receita.Titulo</h1>
+                
+                <div class="recipe-meta-info">
+                    <div class="recipe-author-card">
+                        @{
+var user = Model.Receita.User;
+                        // Verifica se a URL existe E se NÃO é a URL da foto padrão
+ bool hasActualProfilePicture = 
+ !string.IsNullOrEmpty(user?.ProfilePictureUrl) &&
+ !user.ProfilePictureUrl.Contains("default-profile.png");
+ }
 
-<hr />
-
-<section class="mt-4">
-    <h3>Comentários (@Model.Receita.Comentarios!.Count)</h3>
-
-    @if (User.Identity!.IsAuthenticated)
-    {
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5>Adicionar um Comentário:</h5>
-                <form asp-action="AdicionarComentario" method="post">
-                    <input type="hidden" asp-for="ReceitaId" /> 
-                    
-                    <div class="form-group">
-                        <textarea asp-for="NovoComentarioTexto" class="form-control" rows="3" placeholder="Escreva seu comentário aqui..."></textarea>
-                        <span asp-validation-for="NovoComentarioTexto" class="text-danger"></span>
+ @if (hasActualProfilePicture)
+{
+ <img src="@Model.Receita.User.ProfilePictureUrl" 
+alt="Foto de @Model.Receita.User?.UserName" 
+class="author-avatar-large" /> @* CLASSE ORIGINAL MANTIDA *@
+}
+else
+{
+ <div class="author-avatar-large author-avatar-text"> @* ADICIONAMOS CLASSE DE TEXTO NOVO *@
+ @Model.Receita.User?.UserName?.Substring(0, 1).ToUpper()
+ </div>
+}
+                        <div class="author-details">
+                            <span class="author-name-large">@Model.Receita.User?.UserName</span>
+                            <span class="recipe-date-large">
+                                <i class="fas fa-calendar-alt"></i>
+                                @Model.Receita.DataCriacao.ToString("dd 'de' MMMM 'de' yyyy")
+                            </span>
+                        </div>
                     </div>
                     
-                    <button type="submit" class="btn btn-success mt-2">Enviar Comentário</button>
-                </form>
+                    <div class="recipe-stats-inline">
+                        <div class="stat-inline">
+                            <i class="fas fa-clock"></i>
+                            <span>@Model.Receita.TempoPreparoMinutos min</span>
+                        </div>
+                        <div class="stat-inline likes">
+                            <i class="fas fa-heart"></i>
+                            <span id="likeCountDisplay">@Model.TotalCurtidas</span>
+                        </div>
+                    </div>
+                </div>
+                
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    <div class="recipe-actions">
+                        <button id="likeButton" 
+                                data-receita-id="@Model.ReceitaId"
+                                class="btn-action @(Model.IsLikedByCurrentUser ? "active" : "")"
+                                type="button">
+                            <i class="fas fa-heart"></i>
+                            <span>@(Model.IsLikedByCurrentUser ? "Curtido" : "Curtir")</span>
+                        </button>
+                        
+                        <button id="saveButton" 
+                                data-receita-id="@Model.ReceitaId"
+                                class="btn-action @(Model.IsSavedByCurrentUser ? "active-save" : "")"
+                                type="button">
+                            <i class="fas fa-bookmark"></i>
+                            <span>@(Model.IsSavedByCurrentUser ? "Salvo" : "Salvar")</span>
+                        </button>
+                    </div>
+                }
             </div>
         </div>
+        
+        @* Recipe Content Grid *@
+        <div class="recipe-content-grid">
+            
+            @* Ingredients Section *@
+            <div class="recipe-section ingredients-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-list-ul"></i>
+                    </div>
+                    <h2 class="section-title">Ingredientes</h2>
+                </div>
+                
+                <ul class="ingredients-list">
+                    @foreach (var ri in Model.Receita.ReceitaIngredientes!)
+                    {
+                        <li class="ingredient-item">
+                            <span class="ingredient-check">
+                                <i class="fas fa-check"></i>
+                            </span>
+                            <span class="ingredient-text">
+                                <strong>@ri.Quantidade</strong> de @ri.Ingrediente.Nome
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </div>
+            
+            @* Instructions Section *@
+            <div class="recipe-section instructions-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-list-ol"></i>
+                    </div>
+                    <h2 class="section-title">Modo de Preparo</h2>
+                </div>
+                
+                <div class="instructions-content">
+                    @{
+                        var passos = Model.Receita.Instrucoes.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                        int stepNumber = 1;
+                        foreach (var passo in passos)
+                        {
+                            if (!string.IsNullOrWhiteSpace(passo))
+                            {
+                                <div class="instruction-step">
+                                    <div class="step-number">@stepNumber</div>
+                                    <p class="step-text">@passo.Trim()</p>
+                                </div>
+                                stepNumber++;
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        
+        @* Author Actions *@
+        @if (isAuthor)
+        {
+            <div class="author-actions-section">
+                <div class="author-actions-card">
+                    <div class="author-badge">
+                        <i class="fas fa-crown"></i>
+                        <span>Você é o autor desta receita</span>
+                    </div>
+                    <div class="author-buttons">
+                        <a asp-action="Edit" asp-route-id="@Model.ReceitaId" class="btn-author-edit">
+                            <i class="fas fa-edit"></i>
+                            Editar Receita
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@Model.ReceitaId" class="btn-author-delete">
+                            <i class="fas fa-trash-alt"></i>
+                            Excluir Receita
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+        
+        @* Comments Section *@
+        <section class="comments-section">
+            <div class="comments-header">
+                <h3 class="comments-title">
+                    <i class="fas fa-comments"></i>
+                    Comentários (@Model.Receita.Comentarios!.Count)
+                </h3>
+            </div>
+            
+            @if (User.Identity!.IsAuthenticated)
+            {
+                <div class="comment-form-card">
+                    <h4 class="comment-form-title">Deixe seu comentário</h4>
+                    <form asp-action="AdicionarComentario" method="post">
+                        <input type="hidden" asp-for="ReceitaId" />
+                        <input type="hidden" name="__RequestVerificationToken" value="@Html.AntiForgeryToken()" />
+                        
+                        <div class="form-group">
+                            <textarea asp-for="NovoComentarioTexto" 
+                                      class="comment-textarea" 
+                                      rows="4" 
+                                      placeholder="Compartilhe sua opinião sobre esta receita..."></textarea>
+                            <span asp-validation-for="NovoComentarioTexto" class="form-error"></span>
+                        </div>
+                        
+                        <button type="submit" class="btn-comment-submit">
+                            <i class="fas fa-paper-plane"></i>
+                            Enviar Comentário
+                        </button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <div class="comment-login-prompt">
+                    <i class="fas fa-lock"></i>
+                    <p>
+                        <a asp-controller="Account" asp-action="Login">Faça login</a> 
+                        para deixar um comentário e interagir com a comunidade.
+                    </p>
+                </div>
+            }
+            
+            <div class="comments-list">
+                @if (Model.Receita.Comentarios.Any())
+                {
+                    @foreach (var comentario in Model.Receita.Comentarios.OrderByDescending(c => c.DataCriacao))
+                    {
+                        <div class="comment-card">
+                            <div class="comment-author">
+                                <div class="comment-avatar-container"> @* Container opcional para melhor controle *@
+    @{
+        var userComentario = comentario.User;
+        // 1. Defina a classe do avatar. Usaremos 'comment-avatar' para o tamanho/estilo
+        // e 'comment-avatar-text' apenas para o estilo da fonte (quando for letra).
+        
+        // 2. Verifica se a URL existe E se NÃO é a URL da foto padrão (ajuste o nome do seu default)
+        bool hasCommentProfilePicture = 
+            !string.IsNullOrEmpty(userComentario?.ProfilePictureUrl) &&
+            !userComentario.ProfilePictureUrl.Contains("default-profile.png");
+    }
+
+    @if (hasCommentProfilePicture)
+    {
+        <img src="@userComentario?.ProfilePictureUrl" 
+             alt="Foto de @userComentario?.UserName" 
+             class="comment-avatar" /> @* Usa a classe 'comment-avatar' *@
     }
     else
     {
-        <div class="alert alert-info">
-            <a asp-controller="Account" asp-action="Login">Faça login</a> para deixar um comentário.
+        <div class="comment-avatar comment-avatar-text"> @* Adiciona a classe extra para estilizar o texto *@
+            @userComentario?.UserName?.Substring(0, 1).ToUpper()
         </div>
     }
-
-    <div class="comentarios-lista mt-4">
-        @if (Model.Receita.Comentarios.Any())
-        {
-            @foreach (var comentario in Model.Receita.Comentarios.OrderByDescending(c => c.DataCriacao))
-            {
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <p class="card-text">@comentario.Conteudo</p>
-                        <footer class="blockquote-footer">
-                            Postado por: <strong>@comentario.User!.UserName</strong> em @comentario.DataCriacao.ToString("dd/MM/yyyy HH:mm")
-                        </footer>
+</div>
+                                <div class="comment-author-info">
+                                    <span class="comment-author-name">@comentario.User!.UserName</span>
+                                    <span class="comment-date">
+                                        <i class="fas fa-clock"></i>
+                                        @comentario.DataCriacao.ToString("dd/MM/yyyy 'às' HH:mm")
+                                    </span>
+                                </div>
+                            </div>
+                            <p class="comment-text">@comentario.Conteudo</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="comments-empty">
+                        <div class="comments-empty-icon">
+                            <i class="fas fa-comment-slash"></i>
+                        </div>
+                        <p>Nenhum comentário ainda. Seja o primeiro a compartilhar sua opinião!</p>
                     </div>
-                </div>
-            }
-        }
-        else
-        {
-            <p>Nenhum comentário ainda. Seja o primeiro!</p>
-        }
-    </div>
-</section>
-
-<div>|
-    <a asp-action="Index">Voltar para a Lista</a>
+                }
+            </div>
+        </section>
+        
+    </main>
+    
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-
+    
     <script>
+        // Toggle Mobile Menu
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuIcon = document.getElementById('menuIcon');
+            
+            mobileMenu.classList.toggle('active');
+            
+            if (mobileMenu.classList.contains('active')) {
+                menuIcon.classList.remove('fa-bars');
+                menuIcon.classList.add('fa-times');
+            } else {
+                menuIcon.classList.remove('fa-times');
+                menuIcon.classList.add('fa-bars');
+            }
+        }
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Like Button
         document.getElementById('likeButton')?.addEventListener('click', async function() {
             const button = this;
             const receitaId = button.getAttribute('data-receita-id');
@@ -140,8 +354,7 @@
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
-                        // Inclui o token anti-forgery, se estiver configurado
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
                     }
                 });
 
@@ -153,11 +366,11 @@
 
                     // Alterna o estilo do botão
                     if (data.isLiked) {
-                        button.classList.remove('btn-outline-danger');
-                        button.classList.add('btn-danger');
+                        button.classList.add('active');
+                        button.querySelector('span').textContent = 'Curtido';
                     } else {
-                        button.classList.remove('btn-danger');
-                        button.classList.add('btn-outline-danger');
+                        button.classList.remove('active');
+                        button.querySelector('span').textContent = 'Curtir';
                     }
                 }
             } catch (error) {
@@ -165,6 +378,7 @@
             }
         });
 
+        // Save Button
         document.getElementById('saveButton')?.addEventListener('click', async function() {
             const button = this;
             const receitaId = button.getAttribute('data-receita-id');
@@ -174,7 +388,7 @@
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
                     }
                 });
 
@@ -183,16 +397,41 @@
                     
                     // Alterna o estilo do botão
                     if (data.isSaved) {
-                        button.classList.remove('btn-outline-success');
-                        button.classList.add('btn-success');
+                        button.classList.add('active-save');
+                        button.querySelector('span').textContent = 'Salvo';
                     } else {
-                        button.classList.remove('btn-success');
-                        button.classList.add('btn-outline-success');
+                        button.classList.remove('active-save');
+                        button.querySelector('span').textContent = 'Salvar';
                     }
                 }
             } catch (error) {
                 console.error('Erro ao salvar/desalvar:', error);
             }
+        });
+        
+        // Scroll animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.recipe-section, .comment-card, .author-actions-section').forEach(function(el) {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
         });
     </script>
 }

@@ -87,6 +87,7 @@ namespace CookBook.Controllers
                 .Include(r => r.Comentarios!) // Os comentários da receita
                     .ThenInclude(c => c.User) // O autor de cada comentário
                 .Include(r => r.ReceitaCurtidas)
+                .Include(r => r.ReceitaSalvas) // <<<<< LINHA CRÍTICA ADICIONADA AQUI!
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (receita == null)

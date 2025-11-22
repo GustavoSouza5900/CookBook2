@@ -1,0 +1,132 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Entrar - CookBook";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cookbook-styles.css">
+}
+
+<div class="navbar-spacer"></div>
+
+<main class="auth-page">
+    <div class="auth-container">
+        
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h1 class="auth-title">Bem-vindo de volta!</h1>
+                <p class="auth-subtitle">Entre para continuar sua jornada culinária</p>
+            </div>
+
+            <form id="account" method="post" class="auth-form">
+                <div asp-validation-summary="ModelOnly" class="alert-error" role="alert"></div>
+                
+                <div class="form-group">
+                    <label asp-for="Input.Email" class="form-label">
+                        <i class="fas fa-envelope"></i>
+                        Email
+                    </label>
+                    <input asp-for="Input.Email" 
+                           class="form-input" 
+                           autocomplete="username" 
+                           aria-required="true" 
+                           placeholder="seu@email.com" />
+                    <span asp-validation-for="Input.Email" class="form-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Input.Password" class="form-label">
+                        <i class="fas fa-lock"></i>
+                        Senha
+                    </label>
+                    <input asp-for="Input.Password" 
+                           class="form-input" 
+                           autocomplete="current-password" 
+                           aria-required="true" 
+                           placeholder="••••••••" />
+                    <span asp-validation-for="Input.Password" class="form-error"></span>
+                </div>
+                
+                <div class="form-remember">
+                    <label class="checkbox-label">
+                        <input class="checkbox-input" asp-for="Input.RememberMe" />
+                        <span class="checkbox-text">@Html.DisplayNameFor(m => m.Input.RememberMe)</span>
+                    </label>
+                    <a id="forgot-password" asp-page="./ForgotPassword" class="link-primary">
+                        Esqueceu a senha?
+                    </a>
+                </div>
+                
+                <button id="login-submit" type="submit" class="btn-cookbook btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Entrar
+                </button>
+            </form>
+
+            <div class="auth-divider">
+                <span>ou</span>
+            </div>
+
+            @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+            {
+                <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <div class="external-logins">
+                        @foreach (var provider in Model.ExternalLogins!)
+                        {
+                            <button type="submit" 
+                                    class="btn-cookbook btn-outline btn-block" 
+                                    name="provider" 
+                                    value="@provider.Name" 
+                                    title="Entrar usando @provider.DisplayName">
+                                <i class="fab fa-@provider.Name.ToLower()"></i>
+                                Entrar com @provider.DisplayName
+                            </button>
+                        }
+                    </div>
+                </form>
+            }
+
+            <div class="auth-footer">
+                <p class="auth-footer-text">
+                    Não tem uma conta?
+                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="link-accent">
+                        Cadastre-se gratuitamente
+                    </a>
+                </p>
+                <p class="auth-footer-text">
+                    <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" class="link-muted">
+                        Reenviar confirmação de email
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <div class="auth-illustration">
+            <div class="illustration-content">
+                <i class="fas fa-book-open"></i>
+                <h2>Compartilhe suas receitas</h2>
+                <p>Junte-se à nossa comunidade de chefs apaixonados</p>
+                
+                <div class="stats-mini">
+                    <div class="stat-mini">
+                        <i class="fas fa-users"></i>
+                        <span>1000+ Chefs</span>
+                    </div>
+                    <div class="stat-mini">
+                        <i class="fas fa-utensils"></i>
+                        <span>5000+ Receitas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -13,5 +13,6 @@ namespace CookBook.ViewModels
         public IEnumerable<UserBadge> AchievedBadges { get; set; } = new List<UserBadge>();
         
         public IEnumerable<Badge> AllAvailableBadges { get; set; } = new List<Badge>();
+        public string? ProfilePictureUrl { get; set; }
     }
 }
