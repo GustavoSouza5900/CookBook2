@@ -857,4 +857,4 @@ C:\Users\Henrique\Documents\CookBook2\obj\Debug\net9.0\refint\CookBook.dll
 C:\Users\Henrique\Documents\CookBook2\obj\Debug\net9.0\CookBook.pdb
 C:\Users\Henrique\Documents\CookBook2\obj\Debug\net9.0\CookBook.genruntimeconfig.cache
 C:\Users\Henrique\Documents\CookBook2\obj\Debug\net9.0\ref\CookBook.dll
-C:\Users\Henrique\Documents\CookBook2\obj\Debug\net9.0\compressed\nlsip1h1lv-uegpap3jf8.gz
+C:\Users\Henrique\Documents\CookBook2\obj\Debug\net9.0\compressed\nlsip1h1lv-28tk9iutms.gz

@@ -1287,6 +1287,12 @@ p {
   color: var(--danger);
 }
 
+.meta-item comments{
+    color: var(--danger);
+}
+.meta-item.comments i {
+    color: #3498db; /* Azul para comentários */
+}
 /* Empty State */
 .recipe-empty {
   text-align: center;

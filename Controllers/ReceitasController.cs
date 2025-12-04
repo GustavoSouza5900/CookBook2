@@ -36,6 +36,7 @@ namespace CookBook.Controllers
             var receitasQuery = _context.Receita
                 .Include(r => r.User)
                 .Include(r => r.ReceitaCurtidas)
+                .Include(r => r.Comentarios) 
                 .AsQueryable();
             
             if (!string.IsNullOrEmpty(viewModel.SearchQuery))
@@ -66,6 +67,9 @@ namespace CookBook.Controllers
                     }
                 }
             }
+            receitasQuery = receitasQuery
+            .OrderByDescending(r => r.ReceitaCurtidas!.Count + r.Comentarios!.Count);
+
             viewModel.Receitas = await receitasQuery.ToListAsync();
 
             return View(viewModel);

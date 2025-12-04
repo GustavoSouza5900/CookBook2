@@ -146,7 +146,11 @@ class="feed-avatar-img" />
                                 </div>
                                 <div class="meta-item likes">
                                     <i class="fas fa-heart"></i>
-                                    <span>@item.ReceitaCurtidas!.Count curtidas</span>
+                                    <span>@item.ReceitaCurtidas!.Count @(item.ReceitaCurtidas!.Count == 1 ? "curtida" : "curtidas")</span>
+                                </div>
+                                <div class="meta-item comments">
+                                    <i class="fas fa-comment"></i>
+                                    <span>@item.Comentarios!.Count @(item.Comentarios!.Count == 1 ? "comentário" : "comentários")</span>
                                 </div>
                             </div>
                         </div>

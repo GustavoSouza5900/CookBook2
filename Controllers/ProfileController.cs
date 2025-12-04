@@ -29,13 +29,15 @@ namespace CookBook.Controllers
                 .OfType<ApplicationUser>() // 
                 .OrderByDescending(u => u.TotalLikesReceived)
                 .ThenByDescending(u => u.Level)
+                .ThenByDescending(u => u.ExperiencePoints)
                 .Select(u => new 
                 {
                     u.UserName,
                     u.Level,
                     u.TotalLikesReceived,
                     u.Id,
-                    ProfilePictureUrl = u.ProfilePictureUrl
+                    ProfilePictureUrl = u.ProfilePictureUrl,
+                    u.ExperiencePoints
                 })
                 .Take(50) 
                 .ToListAsync();

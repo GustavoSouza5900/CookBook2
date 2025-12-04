@@ -14,7 +14,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Receita> Receita { get; set; }
     public DbSet<Ingrediente> Ingrediente { get; set; }
     public DbSet<Comentario> Comentario { get; set; }
-    public DbSet<ReceitaIngrediente> ReceitaIngrediente { get; set; }
+    public DbSet<ReceitaIngrediente> ReceitaIngrediente { get; set; } 
     public DbSet<ReceitaCurtida> ReceitaCurtida { get; set; }
     public DbSet<ReceitaSalva> ReceitaSalva { get; set; }
     public DbSet<Badge> Badge { get; set; }
