@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CookBook.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251120170937_AdicionarApplicationUser")]
-    partial class AdicionarApplicationUser
+    [Migration("20251204030341_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.10")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -46,9 +46,6 @@ namespace CookBook.Migrations
 
                     b.Property<int>("ExperiencePoints")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("LastRewardDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("Level")
                         .HasColumnType("int");
@@ -76,8 +73,17 @@ namespace CookBook.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TotalLikesReceived")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalSavedRecipes")
+                        .HasColumnType("int");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -97,6 +103,85 @@ namespace CookBook.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("CookBook.Models.Badge", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IconClass")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TriggerEvent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Badge");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Publique sua primeira receita.",
+                            IconClass = "fas fa-star",
+                            Name = "Chef Novato",
+                            TriggerEvent = "RECIPE_COUNT_1"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Publique 10 receitas.",
+                            IconClass = "fas fa-trophy",
+                            Name = "Mestre Culinário",
+                            TriggerEvent = "RECIPE_COUNT_10"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Receba 1 curtidas no total.",
+                            IconClass = "fas fa-heart",
+                            Name = "Primeira de Muitas",
+                            TriggerEvent = "TOTAL_LIKES_1"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Receba 50 curtidas no total.",
+                            IconClass = "fas fa-fire",
+                            Name = "Popular",
+                            TriggerEvent = "TOTAL_LIKES_50"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Publique seu primeiro comentário",
+                            IconClass = "fas fa-comment",
+                            Name = "Opnião Própria",
+                            TriggerEvent = "COMMENT_COUNT_1"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Publique 5 comentários.",
+                            IconClass = "fas fa-comments",
+                            Name = "Comentarista Ativo",
+                            TriggerEvent = "COMMENT_COUNT_5"
+                        });
                 });
 
             modelBuilder.Entity("CookBook.Models.Comentario", b =>
@@ -268,6 +353,27 @@ namespace CookBook.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ReceitaSalva");
+                });
+
+            modelBuilder.Entity("CookBook.Models.UserBadge", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("BadgeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateAchieved")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "BadgeId");
+
+                    b.HasIndex("BadgeId");
+
+                    b.ToTable("UserBadge");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -490,6 +596,25 @@ namespace CookBook.Migrations
                         .IsRequired();
 
                     b.Navigation("Receita");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CookBook.Models.UserBadge", b =>
+                {
+                    b.HasOne("CookBook.Models.Badge", "Badge")
+                        .WithMany()
+                        .HasForeignKey("BadgeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CookBook.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Badge");
 
                     b.Navigation("User");
                 });
